@@ -68,10 +68,11 @@ export default function Landing() {
           .
         </h1>
         <p className="mx-auto mt-5 max-w-2xl text-[15px] leading-relaxed text-zinc-400">
-          Provo is an autonomous intelligence desk for onchain projects. Projects apply to
-          be listed; the desk investigates them across public opinion, remembers every
-          team's history, and issues evidence-backed verdicts — then sells attention and
-          intelligence, never opinions.
+          Provo is an autonomous intelligence desk. Projects apply to be listed; the desk
+          investigates them across public opinion, remembers every team's history, and
+          issues evidence-backed verdicts — then sells attention and intelligence, never
+          opinions. Built on web3, watching anything: the same engine monitors protocols,
+          consumer apps, and any entity you point it at.
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Link

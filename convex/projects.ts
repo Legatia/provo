@@ -1,6 +1,6 @@
 import { action, internalAction, internalMutation, internalQuery, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
-import { internal } from "./_generated/api";
+import { internal, api } from "./_generated/api";
 import * as analysis from "./lib/analysis";
 import * as firecrawl from "./lib/firecrawl";
 import * as sibyl from "./lib/sibyl";
@@ -104,6 +104,16 @@ const FIXTURES: Array<{
     status: "applied", riskTags: [], simulated: true,
     teamNote: "Simulated applicant; team history is a demo construct stored in Sibyl.",
   },
+  {
+    // BEYOND WEB3 — a non-crypto entity watched by the very same engine.
+    name: "Lumen Notes", slug: "lumen-notes", chain: "consumer",
+    tagline: "SIMULATION · consumer AI notes app — the beyond-web3 monitor demo.",
+    status: "listed", verdict: "approved", sentimentScore: 74,
+    riskTags: [], simulated: true,
+    teamNote: "Fictional non-crypto app; monitored to prove the engine is domain-agnostic.",
+    verdictSummary:
+      "Simulated non-web3 entity: the same engine, the same memory, the same credits — watching a consumer AI app instead of a protocol.",
+  },
 ];
 
 /** Idempotent seed: real applicants + labeled simulations + rug history in Sibyl. */
@@ -118,17 +128,19 @@ export const reseedBoard = action({
 export const seedBoard = action({
   args: {},
   handler: async (ctx): Promise<string> => {
-    const existing = await ctx.runQuery(internal.projects.listAllInternal, {});
-    if (existing.length > 0) return `already seeded (${existing.length} projects)`;
     return await seedBoardInternal(ctx);
   },
 });
 
 async function seedBoardInternal(ctx: any): Promise<string> {
+    const existing = (await ctx.runQuery(internal.projects.listAllInternal, {})) as any[];
+    const bySlug = new Set(existing.map((p: any) => p.slug));
 
     const company = (await ctx.runQuery(internal.queries.getCompanyInternal, {})) as any;
     const t = now();
+    let added = 0;
     for (const f of FIXTURES) {
+      if (bySlug.has(f.slug)) continue; // per-slug upsert — safe to run anytime
       await ctx.runMutation(internal.projects.insertProject, {
         name: f.name,
         slug: f.slug,
@@ -147,10 +159,11 @@ async function seedBoardInternal(ctx: any): Promise<string> {
         appliedAt: t - Math.floor(Math.random() * 6 * 24 * 3600_000) - 3600_000,
         decidedAt: f.verdict ? t - 3600_000 : undefined,
       });
+      added++;
     }
 
     // The Zenith team's prior rug — written into Sibyl, the ONLY place it
-    // exists. With memory off, the desk reviews Zenith blind.
+    // exists. With memory off, the desk reviews Zenith blind. (Idempotent.)
     await sibyl.save({
       kind: "entity",
       category: "rug_history",
@@ -169,14 +182,41 @@ async function seedBoardInternal(ctx: any): Promise<string> {
       meta: { category: "rug_history", name: "aurum-finance" },
     });
 
+    // BEYOND WEB3: ensure the non-crypto monitored entity exists (the engine
+    // watches every entity, and Lumen Notes is the live proof). Toggles are
+    // copied from the primary account at creation.
+    const lumen = (await ctx.runQuery(api.projects.getProjectBySlug, {
+      slug: "lumen-notes",
+    })) as any;
+    if (lumen) {
+      await ctx.runMutation(internal.projects.ensureMonitoredEntity, {
+        name: "Lumen Notes",
+        product: "Lumen Notes",
+        productKeywords: ["Lumen Notes"],
+        webResearch: company?.webResearchEnabled ?? true,
+        memory: company?.memoryEnabled ?? true,
+        rules: [
+          { label: "Product complaints", description: "App pain: sync failures, crashes, slowness", keywords: ["slow", "broken", "crash", "sync", "bug", "error"] },
+          { label: "Data-loss concerns", description: "Users reporting lost notes or deleted data", keywords: ["lost notes", "data loss", "deleted", "disappeared", "corrupt"] },
+          { label: "Pricing complaints", description: "Grumbles about the subscription or paywall", keywords: ["expensive", "price", "subscription", "paywall", "refund"] },
+          { label: "Churn signals", description: "Users leaving for competing apps", keywords: ["switching", "leaving", "canceled", "alternative"] },
+        ],
+        sources: [
+          { name: "Hacker News mentions", kind: "hn", config: { query: "Lumen Notes" } },
+          { name: "Reddit discussions", kind: "reddit_search", config: { query: "Lumen Notes app" } },
+          { name: "General web mentions", kind: "web_search", config: { query: '"Lumen Notes" review OR complaint' } },
+        ],
+      });
+    }
+
     await ctx.runMutation(internal.state.logTask, {
       company: company?._id,
       type: "remember",
       status: "complete",
-      label: "Board seeded: 5 real Base applicants + 2 labeled simulations · rug history in Sibyl",
-      detail: "zenith-finance applied — desk review pending. The Aurum record lives only in Sibyl memory.",
+      label: `Board seeded: ${added} new applicant${added === 1 ? "" : "s"} (real + labeled simulations) · rug history in Sibyl`,
+      detail: "Engine watches ZephyrSwap (web3) and Lumen Notes (consumer app) — same pipeline, same credits.",
     });
-    return "board seeded";
+    return `board seeded (${added} new)`;
   }
 
 export const insertProject = internalMutation({
@@ -199,6 +239,41 @@ export const clearProjects = internalMutation({
     const all = await ctx.db.query("projects").collect();
     for (const p of all) await ctx.db.delete(p._id);
     return all.length;
+  },
+});
+
+/** Ensure a monitored entity exists (multi-entity engine; domain-agnostic). */
+export const ensureMonitoredEntity = internalMutation({
+  args: {
+    name: v.string(),
+    product: v.string(),
+    productKeywords: v.array(v.string()),
+    webResearch: v.boolean(),
+    memory: v.boolean(),
+    rules: v.array(v.object({ label: v.string(), description: v.string(), keywords: v.array(v.string()) })),
+    sources: v.array(v.object({ name: v.string(), kind: v.string(), config: v.any() })),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("companies")
+      .filter((q) => q.eq(q.field("name"), args.name))
+      .first();
+    if (existing) return existing._id;
+    const id = await ctx.db.insert("companies", {
+      name: args.name,
+      product: args.product,
+      productKeywords: args.productKeywords,
+      webResearchEnabled: args.webResearch,
+      memoryEnabled: args.memory,
+      createdAt: now(),
+    });
+    for (const r of args.rules) {
+      await ctx.db.insert("watchRules", { company: id, enabled: true, ...r });
+    }
+    for (const s of args.sources) {
+      await ctx.db.insert("sources", { company: id, enabled: true, ...s });
+    }
+    return id;
   },
 });
 

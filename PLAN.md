@@ -72,7 +72,7 @@ wallet, Basescan tx) are the evidence standard.
 | Sourcing scope: Farcaster (open API, native) + Reddit/HN (working) — **not X/Telegram** | Walled gardens; scope the pitch to what's covered |
 | Memory fail-closed | If the bridge is down with memory on, decisions proceed **without** history (visible failed task) — never silently fall back to Convex, or the gate dies |
 | **Metered engine credits (Aug 31)** | Projects × time × depth priced as burnable credits; x402 USDC top-up; live burn in the activity feed. Gives x402 a real job: substrate for Monitor, Trust API, and featuring |
-| **"For everyone with an agent" = positioning, not demo (Aug 31)** | Engine is domain-agnostic; the claim lives in README/pitch. Demo stays single-entity crypto-native; multi-entity refactor is post-window |
+| **"For everyone with an agent" = shipped scoped (Aug 31)** | Engine is multi-entity now: it sweeps every monitored entity per cycle, metered per entity (entities is a pricing axis). Live proof: ZephyrSwap (web3) + Lumen Notes (consumer app, simulated) — same pipeline, same credits. Full multi-tenant billing/accounts post-window |
 | **Virtuals = agents as customers (Aug 31)** | ACP adapter sells credits / risk checks to Virtuals-ecosystem agents. Still stretch, still cut line — buildable only after credits + x402 exist |
 
 ---

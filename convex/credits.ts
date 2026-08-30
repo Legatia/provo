@@ -126,11 +126,17 @@ export const settle = internalMutation({
   },
 });
 
-/** Balance + recent ledger rows for the Monitor card. */
+/** Balance + recent ledger rows for a monitored entity's Monitor card.
+ *  Pass {name} for a specific entity; defaults to the primary account. */
 export const getBalance = query({
-  args: {},
-  handler: async (ctx) => {
-    const company = await ctx.db.query("companies").first();
+  args: { name: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    const company = args.name
+      ? await ctx.db
+          .query("companies")
+          .filter((q) => q.eq(q.field("name"), args.name))
+          .first()
+      : await ctx.db.query("companies").first();
     if (!company) return null;
     const history = await ctx.db
       .query("creditLedger")

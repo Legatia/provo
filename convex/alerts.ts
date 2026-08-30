@@ -18,7 +18,9 @@ export const sendAlert = internalAction({
     recurrence: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const company = (await ctx.runQuery(internal.queries.getCompanyInternal, {})) as any;
+    const company = (await ctx.runQuery(internal.queries.getCompanyByIdInternal, {
+      id: args.company,
+    })) as any;
 
     // METER: alert delivery (credits.ts)
     let meterReason: string | null = null;

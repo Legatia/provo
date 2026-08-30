@@ -445,7 +445,7 @@ export default function DemoPanel() {
           <Step
             n="B1"
             title="Seed the board"
-            desc="9 fictional applicants (one pre-featured, paid placement) + the Aurum rug history written into Sibyl — the only place it exists. Idempotent."
+            desc="Real Base applicants + labeled simulations (one pre-featured, paid placement), the Aurum rug history written into Sibyl, and the second monitored entity (Lumen Notes — a consumer app, proving the engine is domain-agnostic). Per-slug idempotent."
             busy={busy}
             onClick={run("Seed the board", () => seedBoard({}))}
           />

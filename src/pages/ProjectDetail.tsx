@@ -16,22 +16,22 @@ type Tab = "dossier" | "engine" | "findings";
 export default function ProjectDetail() {
   const { slug } = useParams<{ slug: string }>();
   const project = useQuery(api.projects.getProjectBySlug, slug ? { slug } : "skip");
-  const company = useQuery(api.queries.getCompany, {});
-  const credits = useQuery(api.credits.getBalance, {});
+  const monitoredNames = useQuery(api.queries.listMonitoredNames, {});
+  const credits = useQuery(api.credits.getBalance, project ? { name: project.name } : "skip");
   const topUp = useMutation(api.credits.grant);
   const [topping, setTopping] = useState(false);
   const [tab, setTab] = useState<Tab>("dossier");
 
-  if (project === undefined) {
+  if (project === undefined || monitoredNames === undefined) {
     return <div className="py-16 text-center text-[12px] text-zinc-500">loading…</div>;
   }
   if (project === null) {
     return <div className="py-16 text-center text-[12px] text-zinc-500">No such project on the board.</div>;
   }
 
-  // the engine deeply monitors exactly one project (the watched one)
-  const monitored =
-    !!company && company.name.toLowerCase() === project.name.toLowerCase();
+  // the engine watches every monitored entity; Engine + Findings are exposed
+  // per entity
+  const monitored = monitoredNames.includes(project.name);
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "dossier", label: "Dossier" },

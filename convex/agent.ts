@@ -105,135 +105,145 @@ export const runMonitorCycle = internalAction({
     const task = await ctx.runMutation(internal.state.logTask, {
       type: "observe",
       status: "running",
-      label: "Checking monitored sources for new customer signals",
+      label: "Checking monitored sources for new signals",
     });
     try {
-      const company = (await ctx.runQuery(internal.queries.getCompanyInternal, {})) as any;
-      if (!company) {
-        await ctx.runMutation(internal.state.completeTask, { taskId: task, detail: "No company configured" });
-        return;
-      }
-      const sources = (await ctx.runQuery(internal.queries.listSourcesInternal, {
-        company: company._id,
-      })) as any[];
-
-      // METER: source sweep (credits.ts)
-      const meter = await ctx.runMutation(internal.credits.burn, {
-        company: company._id,
-        action: "monitor_cycle",
-        detail: `source sweep · ${sources.length} sources`,
-      });
-      if (!meter.ok) {
-        await ctx.runMutation(internal.state.completeTask, {
-          taskId: task,
-          detail: `monitor paused — ${meter.reason}`,
-        });
+      // the engine watches EVERY monitored entity — web3 or not (multi-entity)
+      const entities = (await ctx.runQuery(internal.queries.listMonitoredInternal, {})) as any[];
+      if (entities.length === 0) {
+        await ctx.runMutation(internal.state.completeTask, { taskId: task, detail: "No monitored entities configured" });
         return;
       }
 
-      let fetched = 0;
-      let newSignals = 0;
-      for (const source of sources) {
-        let items: FetchedItem[] = [];
-        try {
-          items = await fetchSource(
-            source,
-            company.webResearchEnabled ?? firecrawl.enabled()
-          );
-        } catch (e: any) {
-          await ctx.runMutation(internal.state.completeTask, {
-            taskId: task,
-            status: "complete",
-            detail: `Source ${source.name} failed: ${e.message}`,
-          });
-          continue;
-        }
-        fetched += items.length;
+      let totalSources = 0;
+      let totalFetched = 0;
+      let totalSignals = 0;
+      const paused: string[] = [];
 
-        // change detection: hash of item ids — skip if nothing new
-        const hash = await firecrawl.hashContent(items.map((i) => i.externalId).join(","));
-        if (hash === source.lastContentHash) continue;
-
-        // dedupe against already-stored signals
-        const seen = new Set(
-          ((await ctx.runQuery(internal.queries.listExternalIdsInternal, {
-            externalIds: items.map((i) => i.externalId),
-          })) as string[]) ?? []
-        );
-        const fresh = items.filter((i) => !seen.has(i.externalId)).slice(0, MAX_SIGNALS_PER_CYCLE);
-
-        await ctx.runMutation(internal.state.updateSource, {
-          source: source._id,
-          lastContentHash: hash,
-          lastItemCount: items.length,
-        });
-
-        if (fresh.length === 0) continue;
-
-        // deterministic pre-filter: web/hn items must mention the product by
-        // name — fuzzy search matches (e.g. "AI assistant") are noise the LLM
-        // shouldn't even see. Code handles this; the LLM handles judgment.
-        const keywords = (company.productKeywords ?? []).map((k: string) => k.toLowerCase());
-        const plausible = fresh.filter((i) => {
-          if (i.source === "email") return true; // email is addressed to us
-          const hay = `${i.title ?? ""} ${i.content}`.toLowerCase();
-          return keywords.some((k: string) => hay.includes(k));
-        });
-        if (plausible.length === 0) continue;
-
-        // DETECT: classify against watch rules
-        const rules = (await ctx.runQuery(internal.queries.listWatchRulesInternal, {
+      for (const company of entities) {
+        const sources = (await ctx.runQuery(internal.queries.listSourcesInternal, {
           company: company._id,
         })) as any[];
-        const classified = await analysis.classifyItems({
-          company: company.name,
-          product: company.product,
-          watchRules: rules.map((r: any) => ({
-            label: r.label,
-            description: r.description,
-            keywords: r.keywords,
-          })),
-          items: plausible,
-        });
+        totalSources += sources.length;
 
-        for (const c of classified) {
-          if (!c.relevant) continue;
-          const item = fresh.find((i) => i.externalId === c.externalId);
-          if (!item) continue;
-          const signalId = await ctx.runMutation(internal.state.insertSignal, {
-            company: company._id,
-            source: item.source,
-            sourceUrl: item.url,
-            externalId: item.externalId,
-            occurredAt: item.occurredAt,
-            content: item.content,
-            author: item.author,
-            relevant: true,
-            reason: c.reason,
-            topics: c.topics,
-            sentiment: c.sentiment,
-            urgency: Math.round(clamp(c.urgency, 0, 100)),
-            productArea: c.productArea,
-            affectedSegment: c.affectedSegment,
-          });
-          if (signalId) {
-            newSignals++;
-            await ctx.runMutation(internal.state.logTask, {
-              company: company._id,
-              type: "detect",
+        // METER: source sweep per entity (credits.ts) — entities is a pricing axis
+        const meter = await ctx.runMutation(internal.credits.burn, {
+          company: company._id,
+          action: "monitor_cycle",
+          detail: `source sweep · ${company.name} · ${sources.length} sources`,
+        });
+        if (!meter.ok) {
+          paused.push(company.name);
+          continue;
+        }
+
+        let fetched = 0;
+        let newSignals = 0;
+        for (const source of sources) {
+          let items: FetchedItem[] = [];
+          try {
+            items = await fetchSource(
+              source,
+              company.webResearchEnabled ?? firecrawl.enabled()
+            );
+          } catch (e: any) {
+            await ctx.runMutation(internal.state.completeTask, {
+              taskId: task,
               status: "complete",
-              label: `Detected customer signal: ${c.productArea}`,
-              detail: item.content.slice(0, 200),
+              detail: `Source ${source.name} failed: ${e.message}`,
             });
-            // cluster into issues (sequential to keep LLM usage sane)
-            await ctx.runAction(internal.agent.processSignal, { signalId });
+            continue;
+          }
+          fetched += items.length;
+
+          // change detection: hash of item ids — skip if nothing new
+          const hash = await firecrawl.hashContent(items.map((i) => i.externalId).join(","));
+          if (hash === source.lastContentHash) continue;
+
+          // dedupe against already-stored signals
+          const seen = new Set(
+            ((await ctx.runQuery(internal.queries.listExternalIdsInternal, {
+              externalIds: items.map((i) => i.externalId),
+            })) as string[]) ?? []
+          );
+          const fresh = items.filter((i) => !seen.has(i.externalId)).slice(0, MAX_SIGNALS_PER_CYCLE);
+
+          await ctx.runMutation(internal.state.updateSource, {
+            source: source._id,
+            lastContentHash: hash,
+            lastItemCount: items.length,
+          });
+
+          if (fresh.length === 0) continue;
+
+          // deterministic pre-filter: web/hn items must mention the entity by
+          // name — fuzzy search matches are noise the LLM shouldn't even see.
+          const keywords = (company.productKeywords ?? []).map((k: string) => k.toLowerCase());
+          const plausible = fresh.filter((i) => {
+            if (i.source === "email") return true; // email is addressed to us
+            const hay = `${i.title ?? ""} ${i.content}`.toLowerCase();
+            return keywords.some((k: string) => hay.includes(k));
+          });
+          if (plausible.length === 0) continue;
+
+          // DETECT: classify against this entity's watch rules
+          const rules = (await ctx.runQuery(internal.queries.listWatchRulesInternal, {
+            company: company._id,
+          })) as any[];
+          const classified = await analysis.classifyItems({
+            company: company.name,
+            product: company.product,
+            watchRules: rules.map((r: any) => ({
+              label: r.label,
+              description: r.description,
+              keywords: r.keywords,
+            })),
+            items: plausible,
+          });
+
+          for (const c of classified) {
+            if (!c.relevant) continue;
+            const item = fresh.find((i) => i.externalId === c.externalId);
+            if (!item) continue;
+            const signalId = await ctx.runMutation(internal.state.insertSignal, {
+              company: company._id,
+              source: item.source,
+              sourceUrl: item.url,
+              externalId: item.externalId,
+              occurredAt: item.occurredAt,
+              content: item.content,
+              author: item.author,
+              relevant: true,
+              reason: c.reason,
+              topics: c.topics,
+              sentiment: c.sentiment,
+              urgency: Math.round(clamp(c.urgency, 0, 100)),
+              productArea: c.productArea,
+              affectedSegment: c.affectedSegment,
+            });
+            if (signalId) {
+              newSignals++;
+              await ctx.runMutation(internal.state.logTask, {
+                company: company._id,
+                type: "detect",
+                status: "complete",
+                label: `Detected signal: ${c.productArea} (${company.name})`,
+                detail: item.content.slice(0, 200),
+              });
+              // cluster into issues (sequential to keep LLM usage sane)
+              await ctx.runAction(internal.agent.processSignal, { signalId });
+            }
           }
         }
+        totalFetched += fetched;
+        totalSignals += newSignals;
       }
 
       await ctx.runMutation(internal.state.completeTask, {
         taskId: task,
-        detail: `Checked ${sources.length} sources, ${fetched} items, ${newSignals} new signals`,
+        detail: `Swept ${entities.length} entities · ${totalSources} sources · ${totalFetched} items · ${totalSignals} new signals${
+          paused.length ? ` · paused (no credits): ${paused.join(", ")}` : ""
+        }`,
       });
     } catch (e: any) {
       await ctx.runMutation(internal.state.completeTask, {
@@ -264,7 +274,9 @@ export const processSignal = internalAction({
       silent: true,
     });
     if (!meter.ok) return;
-    const company = (await ctx.runQuery(internal.queries.getCompanyInternal, {})) as any;
+    const company = (await ctx.runQuery(internal.queries.getCompanyByIdInternal, {
+      id: signal.company,
+    })) as any;
 
     const openIssues = (await ctx.runQuery(internal.queries.listIssuesInternal, {
       company: signal.company,
@@ -438,7 +450,9 @@ export const investigateIssue = internalAction({
       issue: args.issue,
     })) as any;
     if (!issue) throw new Error("Issue not found");
-    const company = (await ctx.runQuery(internal.queries.getCompanyInternal, {})) as any;
+    const company = (await ctx.runQuery(internal.queries.getCompanyByIdInternal, {
+      id: issue.company,
+    })) as any;
 
     const task = await ctx.runMutation(internal.state.logTask, {
       company: issue.company,
@@ -752,8 +766,9 @@ export const reportIssue = internalAction({
     ) {
       return;
     }
-    const company = (await ctx.runQuery(internal.queries.getCompanyInternal, {})) as any;
-    const evidence = (await ctx.runQuery(internal.queries.listEvidenceInternal, {
+    const company = (await ctx.runQuery(internal.queries.getCompanyByIdInternal, {
+      id: issue.company,
+    })) as any;    const evidence = (await ctx.runQuery(internal.queries.listEvidenceInternal, {
       issue: args.issue,
     })) as any[];
 

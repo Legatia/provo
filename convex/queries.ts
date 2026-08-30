@@ -17,6 +17,27 @@ export const getCompanyInternal = internalQuery({
   },
 });
 
+/** Per-entity lookup (multi-entity engine). */
+export const getCompanyByIdInternal = internalQuery({
+  args: { id: v.id("companies") },
+  handler: async (ctx, args) => ctx.db.get(args.id),
+});
+
+/** Every monitored entity — the engine is domain-agnostic and multi-entity. */
+export const listMonitoredInternal = internalQuery({
+  args: {},
+  handler: async (ctx) => ctx.db.query("companies").collect(),
+});
+
+/** Public: which entities currently have the engine watching them. */
+export const listMonitoredNames = query({
+  args: {},
+  handler: async (ctx) => {
+    const all = await ctx.db.query("companies").collect();
+    return all.map((c) => c.name);
+  },
+});
+
 export const listSourcesInternal = internalQuery({
   args: { company: v.id("companies") },
   handler: async (ctx, args) =>
