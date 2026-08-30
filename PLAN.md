@@ -183,8 +183,9 @@ Convex agent (TS, cloud) --HTTPS--> sibyl-bridge (FastAPI, sibyl-bridge/) --> si
 - [ ] **Featuring:** x402 `POST /feature` → 402 + USDC terms (~$1) → paid slot on the
       board top; sentiment + verdict **stay visible** beside the slot (integrity beat).
       *The "Featured · demo placement" label is live; the payment rail is not wired yet.*
-- [ ] (optional, near-free) **Trust API:** dossier/odds as JSON behind x402 per-call —
-      the second door (Blockaid/GoPlus comp); reuses the credits rail
+- [x] (done, near-free) **Trust API:** `GET /api/trust?slug=...` — full dossier as JSON
+      behind x402 ($0.05/call) — the second door (Blockaid/GoPlus comp); shares the
+      x402 guard with the credits door. *Live: 402 terms + settled dossier verified.*
 
 ### Phase 3 — Sources + narrative — Sep 6–7
 - [ ] Farcaster ingestion (open API) as a first-class source kind alongside HN/Reddit —

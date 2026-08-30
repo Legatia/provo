@@ -1,8 +1,16 @@
 import { useEffect, useState } from "react";
 import { ConvexProvider, useQuery } from "convex/react";
-import { BrowserRouter, NavLink, Route, Routes, useLocation } from "react-router-dom";
+import {
+  BrowserRouter,
+  NavLink,
+  Outlet,
+  Route,
+  Routes,
+  useLocation,
+} from "react-router-dom";
 import { convex, api } from "./lib/convex";
 import { LiveDot, timeAgo } from "./components/ui";
+import Landing from "./pages/Landing";
 import Board from "./pages/Board";
 import ProjectDetail from "./pages/ProjectDetail";
 import IssueDetail from "./pages/IssueDetail";
@@ -10,14 +18,13 @@ import Chat from "./pages/Chat";
 import DemoPanel from "./pages/DemoPanel";
 
 const NAV = [
-  { to: "/", label: "Board", icon: "◈", end: true },
+  { to: "/board", label: "Board", icon: "◈" },
   { to: "/chat", label: "Ask the desk", icon: "◍" },
   { to: "/demo", label: "Demo", icon: "▶" },
 ];
 
 const PAGE_TITLES: Record<string, [string, string]> = {
-  "/": ["Project board", "every project has a past — Provo keeps the record"],
-  "/project": ["Project", "dossier · engine · findings"],
+  "/board": ["Project board", "every project has a past — Provo keeps the record"],
   "/chat": ["Ask the desk", "answers from live state"],
   "/demo": ["Demo scenario", "deterministic walkthrough · every step is real"],
 };
@@ -34,7 +41,7 @@ function Header() {
     (location.pathname.startsWith("/issues")
       ? ["Finding", "evidence, timeline and investigation"]
       : location.pathname.startsWith("/project")
-        ? PAGE_TITLES["/project"]
+        ? ["Project", "dossier · engine · findings"]
         : ["Provo", ""]);
 
   return (
@@ -84,7 +91,6 @@ function Sidebar() {
           <NavLink
             key={n.to}
             to={n.to}
-            end={n.end as any}
             className={({ isActive }) =>
               `group flex items-center gap-3 rounded-xl px-3 py-2 text-[13px] transition-all ${
                 isActive
@@ -142,13 +148,7 @@ function Shell() {
       <main className="min-w-0 flex-1 overflow-y-auto">
         <Header />
         <div className="mx-auto max-w-6xl px-8 py-7">
-          <Routes>
-            <Route path="/" element={<Board />} />
-            <Route path="/project/:slug" element={<ProjectDetail />} />
-            <Route path="/issues/:issueId" element={<IssueDetail />} />
-            <Route path="/chat" element={<Chat />} />
-            <Route path="/demo" element={<DemoPanel />} />
-          </Routes>
+          <Outlet />
         </div>
       </main>
     </div>
@@ -159,7 +159,16 @@ export default function App() {
   return (
     <ConvexProvider client={convex}>
       <BrowserRouter>
-        <Shell />
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route element={<Shell />}>
+            <Route path="/board" element={<Board />} />
+            <Route path="/project/:slug" element={<ProjectDetail />} />
+            <Route path="/issues/:issueId" element={<IssueDetail />} />
+            <Route path="/chat" element={<Chat />} />
+            <Route path="/demo" element={<DemoPanel />} />
+          </Route>
+        </Routes>
       </BrowserRouter>
     </ConvexProvider>
   );
