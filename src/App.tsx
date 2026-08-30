@@ -52,7 +52,7 @@ function Header() {
       </div>
       <div className="flex items-center gap-3">
         <span className="hidden items-center gap-1.5 rounded-full border border-white/[0.07] bg-white/[0.03] px-2.5 py-1 text-[10px] uppercase tracking-wider text-zinc-500 sm:inline-flex">
-          convex · firecrawl · openai · sibyl
+          convex · sibyl · firecrawl · base
         </span>
         <span className="font-mono text-xs tabular-nums text-zinc-500">
           {clock.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", second: "2-digit" })}
@@ -76,7 +76,7 @@ function Sidebar() {
           🏛️
         </div>
         <div>
-          <div className="text-[13px] font-semibold leading-tight tracking-tight">
+          <div className="font-display text-[17px] font-semibold leading-tight tracking-tight">
             Provo
           </div>
           <div className="mt-0.5 flex items-center gap-1.5 text-[10px] font-medium text-emerald-400">

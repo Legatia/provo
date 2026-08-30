@@ -41,8 +41,8 @@ export default function Chat() {
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-6">
           {(!messages || messages.length === 0) && (
             <div className="flex h-full flex-col items-center justify-center text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500/80 to-violet-600/80 text-xl shadow-[0_0_30px_rgba(99,102,241,0.3)]">
-                🛰️
+              <div className="flex h-12 w-12 items-center justify-center rounded-md border border-brass/50 font-display text-[24px] font-semibold italic text-brass-bright">
+                P
               </div>
               <p className="mt-4 text-sm font-medium text-zinc-300">
                 Ask the desk
@@ -59,8 +59,8 @@ export default function Chat() {
               className={`animate-fade-up flex items-end gap-2.5 ${m.role === "user" ? "justify-end" : "justify-start"}`}
             >
               {m.role === "agent" && (
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500/70 to-violet-600/70 text-[11px]">
-                  🛰️
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-sm border border-rule-strong font-display text-[14px] italic text-brass">
+                  P
                 </span>
               )}
               <div
@@ -81,8 +81,8 @@ export default function Chat() {
           ))}
           {busy && (
             <div className="flex items-end gap-2.5">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500/70 to-violet-600/70 text-[11px]">
-                🛰️
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-sm border border-brass/40 font-display text-[14px] italic text-brass-bright">
+                P
               </span>
               <div className="flex items-center gap-1.5 rounded-2xl rounded-bl-md border border-white/[0.07] bg-white/[0.04] px-4 py-3">
                 {[0, 1, 2].map((i) => (

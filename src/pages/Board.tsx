@@ -12,32 +12,26 @@ import { Card, LiveDot, Button } from "../components/ui";
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { label: string; cls: string }> = {
-    listed: { label: "Listed", cls: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300" },
-    flagged: { label: "⚠ Flagged", cls: "border-amber-500/30 bg-amber-500/10 text-amber-300" },
-    rejected: { label: "Rejected", cls: "border-red-500/30 bg-red-500/10 text-red-300" },
-    under_review: { label: "Desk reviewing…", cls: "border-indigo-500/30 bg-indigo-500/10 text-indigo-300 animate-pulse" },
-    applied: { label: "Applied", cls: "border-white/10 bg-white/[0.04] text-zinc-400" },
+    listed: { label: "Listed", cls: "border-verdigris/40 bg-verdigris/10 text-verdigris" },
+    flagged: { label: "⚠ Flagged", cls: "border-amber-flag/40 bg-amber-flag/10 text-amber-flag" },
+    rejected: { label: "Rejected", cls: "border-oxblood/40 bg-oxblood/10 text-oxblood" },
+    under_review: { label: "Desk reviewing…", cls: "border-brass/40 bg-brass/10 text-brass-bright animate-pulse" },
+    applied: { label: "Applied", cls: "border-rule-strong bg-paper/[0.03] text-paper-dim" },
   };
   const s = map[status] ?? map.applied;
-  return (
-    <span className={`rounded-full border px-2 py-0.5 font-mono text-[10px] font-medium ${s.cls}`}>
-      {s.label}
-    </span>
-  );
+  return <span className={`stamp ${s.cls}`}>{s.label}</span>;
 }
 
 function SimBadge() {
   return (
-    <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 font-mono text-[9.5px] uppercase tracking-wider text-amber-300">
-      simulation
-    </span>
+    <span className="stamp border-rule-strong bg-paper/[0.03] text-paper-dim">simulation</span>
   );
 }
 
 function SentimentBar({ score }: { score?: number }) {
   if (score == null) return <span className="font-mono text-[10px] text-zinc-600">no sentiment yet</span>;
-  const color = score >= 60 ? "bg-emerald-400" : score >= 40 ? "bg-amber-400" : "bg-red-400";
-  const textColor = score >= 60 ? "text-emerald-300" : score >= 40 ? "text-amber-300" : "text-red-300";
+  const color = score >= 60 ? "bg-verdigris" : score >= 40 ? "bg-amber-flag" : "bg-oxblood";
+  const textColor = score >= 60 ? "text-verdigris" : score >= 40 ? "text-amber-flag" : "text-oxblood";
   return (
     <div className="flex items-center gap-2">
       <div className="h-1 w-20 overflow-hidden rounded-full bg-white/[0.07]">
@@ -80,20 +74,18 @@ export default function Board() {
         <div
           key={p._id}
           onClick={() => open(p.slug)}
-          className="relative cursor-pointer overflow-hidden rounded-2xl border border-indigo-500/25 bg-gradient-to-br from-indigo-500/[0.08] to-violet-600/[0.05] p-5 transition-all hover:border-indigo-500/45"
+          className="relative cursor-pointer overflow-hidden rounded-xl border border-brass/45 bg-gradient-to-br from-brass/[0.10] via-brass/[0.04] to-transparent p-5 shadow-[0_0_32px_rgba(201,162,75,0.08)] transition-all hover:border-brass/70"
         >
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <span className="rounded-full border border-indigo-400/30 bg-indigo-500/15 px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-indigo-300">
-                Featured · demo placement
-              </span>
+              <span className="stamp border-brass/40 bg-brass/10 text-brass-bright">Featured · demo placement</span>
               <StatusBadge status={p.status} />
               {p.simulated && <SimBadge />}
             </div>
             <SentimentBar score={p.sentimentScore} />
           </div>
           <div className="mt-3 flex flex-wrap items-baseline gap-x-3">
-            <h3 className="text-[16px] font-semibold text-zinc-100">{p.name}</h3>
+            <h3 className="font-display text-[18px] font-semibold text-paper">{p.name}</h3>
             <span className="rounded border border-white/[0.07] px-1.5 py-px font-mono text-[9px] uppercase text-zinc-500">
               {p.chain}
             </span>
@@ -122,7 +114,7 @@ export default function Board() {
                   {p.chain}
                 </span>
               </div>
-              <h3 className="mt-2.5 text-[14px] font-semibold text-zinc-100">{p.name}</h3>
+              <h3 className="mt-2.5 font-display text-[16px] font-semibold text-paper">{p.name}</h3>
               <p className="mt-1 line-clamp-2 min-h-[2.2em] text-[11.5px] leading-relaxed text-zinc-500">
                 {p.tagline}
               </p>

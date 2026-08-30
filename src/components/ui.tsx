@@ -47,7 +47,7 @@ const STATUS_STYLES: Record<string, string> = {
   emerging: "bg-amber-500/12 text-amber-300 border-amber-500/25",
   watching: "bg-sky-500/12 text-sky-300 border-sky-500/25",
   resolved: "bg-emerald-500/12 text-emerald-300 border-emerald-500/25",
-  running: "bg-indigo-500/12 text-indigo-300 border-indigo-500/25",
+  running: "bg-brass/12 text-brass-bright border-brass/25",
   complete: "bg-emerald-500/12 text-emerald-300 border-emerald-500/25",
   pending: "bg-zinc-500/12 text-zinc-400 border-zinc-500/25",
   failed: "bg-red-500/12 text-red-300 border-red-500/25",
@@ -59,7 +59,7 @@ const STATUS_DOTS: Record<string, string> = {
   emerging: "bg-amber-400",
   watching: "bg-sky-400",
   resolved: "bg-emerald-400",
-  running: "bg-indigo-400",
+  running: "bg-brass",
   complete: "bg-emerald-400",
   pending: "bg-zinc-400",
   failed: "bg-red-400",
@@ -71,7 +71,7 @@ const STATUS_TEXT: Record<string, string> = {
   emerging: "text-amber-300",
   watching: "text-sky-300",
   resolved: "text-emerald-300",
-  running: "text-indigo-300",
+  running: "text-brass-bright",
 };
 
 export function StatusBadge({ status }: { status: string }) {
@@ -96,8 +96,8 @@ export function statusText(status: string): string {
 const TYPE_CONFIG: Record<string, { icon: string; ring: string }> = {
   observe: { icon: "👁", ring: "ring-sky-500/20 bg-sky-500/10" },
   detect: { icon: "📡", ring: "ring-amber-500/20 bg-amber-500/10" },
-  investigate: { icon: "🔍", ring: "ring-indigo-500/20 bg-indigo-500/10" },
-  remember: { icon: "🧠", ring: "ring-violet-500/20 bg-violet-500/10" },
+  investigate: { icon: "🔍", ring: "ring-brass/20 bg-brass/10" },
+  remember: { icon: "🧠", ring: "ring-verdigris/20 bg-verdigris/10" },
   report: { icon: "✉️", ring: "ring-emerald-500/20 bg-emerald-500/10" },
   reply: { icon: "💬", ring: "ring-teal-500/20 bg-teal-500/10" },
   chat: { icon: "💬", ring: "ring-teal-500/20 bg-teal-500/10" },

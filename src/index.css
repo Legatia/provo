@@ -1,8 +1,27 @@
 @import "tailwindcss";
 
+/* ── Provo design tokens — the intelligence bureau ──────────────────────────
+   Editorial/archival: Fraunces (ledger masthead serif) over IBM Plex
+   (institutional document sans/mono). Ink & ivory with brass; verdict
+   semantics: verdigris (listed) · amber (flagged) · oxblood (rejected). */
+
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
+
+  --color-ink: #0c0c0e; /* page */
+  --color-ink-raised: #121214; /* cards */
+  --color-paper: #e9e4d6; /* ivory text */
+  --color-paper-dim: #a39d8e; /* warm secondary */
+  --color-rule: #e9e4d614; /* hairline ledger rules */
+  --color-rule-strong: #e9e4d626;
+  --color-brass: #c9a24b;
+  --color-brass-bright: #e4c476;
+  --color-brass-deep: #8a6d2b;
+  --color-verdigris: #58b98c;
+  --color-amber-flag: #d9a62e;
+  --color-oxblood: #d65a5a;
 }
 
 :root {
@@ -16,11 +35,11 @@ body,
 }
 
 body {
-  @apply bg-zinc-950 font-sans text-zinc-100 antialiased;
-  font-feature-settings: "tnum" 1, "cv05" 1;
+  @apply bg-ink font-sans text-paper antialiased;
+  font-feature-settings: "tnum" 1;
 }
 
-/* ── ambient background ─────────────────────────────────────────────────── */
+/* ── atmosphere: faint bureau-light radials + paper grain ─────────────────── */
 #root {
   position: relative;
 }
@@ -30,10 +49,19 @@ body {
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(52rem 30rem at 8% -6%, rgba(99, 102, 241, 0.07), transparent 60%),
-    radial-gradient(44rem 26rem at 100% 108%, rgba(16, 185, 129, 0.05), transparent 60%),
-    radial-gradient(30rem 20rem at 85% -10%, rgba(251, 191, 36, 0.035), transparent 60%);
+    radial-gradient(52rem 30rem at 10% -8%, rgba(201, 162, 75, 0.06), transparent 60%),
+    radial-gradient(44rem 26rem at 100% 110%, rgba(88, 185, 140, 0.045), transparent 60%),
+    radial-gradient(30rem 20rem at 88% -12%, rgba(233, 228, 214, 0.03), transparent 60%);
   z-index: 0;
+}
+#root::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.91 0 0 0 0 0.89 0 0 0 0 0.84 0 0 0 0.03 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 #root > * {
   position: relative;
@@ -41,24 +69,51 @@ body {
 }
 
 ::selection {
-  background: rgba(129, 140, 248, 0.3);
+  background: rgba(201, 162, 75, 0.32);
+  color: #f4f0e4;
 }
 
 /* ── scrollbars ─────────────────────────────────────────────────────────── */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+  scrollbar-color: rgba(233, 228, 214, 0.14) transparent;
 }
 *::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 *::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(233, 228, 214, 0.14);
   border-radius: 3px;
 }
 *::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.22);
+  background: rgba(233, 228, 214, 0.24);
+}
+
+/* ── the stamp: verdicts, badges, labels ─────────────────────────────────── */
+.stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-width: 1px;
+  --tw-border-style: solid;
+  padding: 0.125rem 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-transform: uppercase;
+  border-radius: 2px;
+  transform: rotate(-1.2deg);
+}
+
+/* ── ledger rule: double hairline under mastheads ────────────────────────── */
+.ledger-rule {
+  border-top: 1px solid var(--color-rule-strong);
+  border-bottom: 1px solid var(--color-rule);
+  height: 3px;
 }
 
 /* ── animations ─────────────────────────────────────────────────────────── */
@@ -89,6 +144,38 @@ body {
   animation: fade-up 0.28s cubic-bezier(0.21, 1, 0.32, 1) both;
 }
 
+/* landing: staggered masthead reveal */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.rise {
+  animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes stamp-in {
+  0% {
+    opacity: 0;
+    transform: rotate(-1.2deg) scale(1.6);
+  }
+  60% {
+    opacity: 1;
+    transform: rotate(-1.2deg) scale(0.96);
+  }
+  100% {
+    transform: rotate(-1.2deg) scale(1);
+  }
+}
+.stamp-in {
+  animation: stamp-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
 @keyframes shimmer {
   0% {
     background-position: -200% 0;
@@ -101,9 +188,9 @@ body {
   border-radius: 0.5rem;
   background: linear-gradient(
     100deg,
-    rgba(255, 255, 255, 0.04) 40%,
-    rgba(255, 255, 255, 0.09) 50%,
-    rgba(255, 255, 255, 0.04) 60%
+    rgba(233, 228, 214, 0.04) 40%,
+    rgba(233, 228, 214, 0.09) 50%,
+    rgba(233, 228, 214, 0.04) 60%
   );
   background-size: 200% 100%;
   animation: shimmer 1.6s linear infinite;
@@ -128,7 +215,7 @@ body {
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(129, 140, 248, 0.12),
+    rgba(201, 162, 75, 0.14),
     transparent
   );
   animation: sweep 1.8s ease-in-out infinite;
@@ -136,7 +223,7 @@ body {
 
 /* focus */
 :focus-visible {
-  outline: 2px solid rgba(129, 140, 248, 0.6);
+  outline: 2px solid rgba(201, 162, 75, 0.6);
   outline-offset: 2px;
   border-radius: 6px;
 }

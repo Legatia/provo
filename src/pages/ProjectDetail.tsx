@@ -43,12 +43,10 @@ export default function ProjectDetail() {
       {/* header */}
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <div>
-          <h2 className="text-lg font-semibold tracking-tight text-zinc-100">
+          <h2 className="font-display text-[24px] font-semibold tracking-tight text-paper">
             {project.name}
             {project.simulated && (
-              <span className="ml-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 font-mono text-[9.5px] uppercase tracking-wider text-amber-300">
-                simulation
-              </span>
+              <span className="stamp ml-2 border-rule-strong bg-paper/[0.03] text-paper-dim">simulation</span>
             )}
           </h2>
           <p className="mt-0.5 text-[12px] text-zinc-500">{project.tagline}</p>
@@ -78,8 +76,8 @@ export default function ProjectDetail() {
             onClick={() => setTab(t.id)}
             className={`rounded-xl border px-3.5 py-1.5 text-[12.5px] font-medium transition-all ${
               tab === t.id
-                ? "border-indigo-400/50 bg-indigo-500/15 text-indigo-200"
-                : "border-white/[0.08] bg-white/[0.02] text-zinc-400 hover:border-white/20 hover:text-zinc-200"
+                ? "border-brass/50 bg-brass/15 text-brass-bright"
+                : "border-rule-strong bg-paper/[0.02] text-paper-dim hover:border-paper/25 hover:text-paper"
             }`}
           >
             {t.label}
@@ -89,10 +87,10 @@ export default function ProjectDetail() {
 
       {/* Provo Monitor — the paying customer's card, with its live meter */}
       {monitored && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-500/25 bg-emerald-500/[0.06] px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-verdigris/30 bg-verdigris/[0.06] px-4 py-3">
           <div className="flex items-center gap-2.5">
-            <span className="flex h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.7)]" />
-            <span className="text-[12.5px] font-medium text-emerald-300">
+            <span className="flex h-2 w-2 rounded-full bg-verdigris shadow-[0_0_6px_rgba(88,185,140,0.7)]" />
+            <span className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-verdigris">
               Provo Monitor · active
             </span>
             <span className="text-[11px] text-zinc-500">
@@ -127,7 +125,7 @@ export default function ProjectDetail() {
                 }
               }}
               disabled={topping}
-              className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 font-mono text-[10px] text-emerald-300 transition-colors hover:bg-emerald-500/20 disabled:opacity-40"
+              className="rounded-md border border-verdigris/40 bg-verdigris/10 px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-verdigris transition-colors hover:bg-verdigris/20 disabled:opacity-40"
             >
               {topping ? "…" : "+100 top-up (demo — x402 pending)"}
             </button>
@@ -151,7 +149,7 @@ export default function ProjectDetail() {
           {project.riskTags && project.riskTags.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-1.5">
               {project.riskTags.map((t) => (
-                <span key={t} className="rounded-full border border-amber-500/25 bg-amber-500/10 px-2 py-0.5 font-mono text-[10px] text-amber-300">
+                <span key={t} className={`stamp border-amber-flag/40 bg-amber-flag/10 text-amber-flag`}>
                   {t}
                 </span>
               ))}
@@ -165,7 +163,7 @@ export default function ProjectDetail() {
               </div>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {project.recalledMemories.map((m) => (
-                  <span key={m} className="rounded-full border border-violet-500/25 bg-violet-500/10 px-2 py-0.5 font-mono text-[10px] text-violet-300">
+                  <span key={m} className="rounded-sm border border-verdigris/30 bg-verdigris/10 px-2 py-0.5 font-mono text-[10px] text-verdigris">
                     {m}
                   </span>
                 ))}

@@ -119,7 +119,7 @@ function LiveResearchCard() {
           </div>
           <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-400 transition-all duration-1000"
+              className="h-full rounded-full bg-gradient-to-r from-brass-deep to-brass-bright transition-all duration-1000"
               style={{ width: `${progress}%` }}
             />
           </div>

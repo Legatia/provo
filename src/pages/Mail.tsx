@@ -36,7 +36,7 @@ function initials(from: string): string {
 function senderColor(from: string): string {
   if (from.includes("maria")) return "bg-gradient-to-br from-sky-500/70 to-blue-600/70";
   if (from.includes("dana")) return "bg-gradient-to-br from-emerald-500/70 to-teal-600/70";
-  if (from.includes("intelligence")) return "bg-gradient-to-br from-indigo-500/70 to-violet-600/70";
+  if (from.includes("intelligence")) return "bg-gradient-to-br from-brass-deep to-brass";
   return "bg-gradient-to-br from-zinc-500/70 to-zinc-600/70";
 }
 
