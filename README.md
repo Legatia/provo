@@ -1,4 +1,4 @@
-# 🏛️ Provo — the desk that never forgets a rug
+# 🏛️ Provo — the intelligence desk that never forgets
 
 > **Provo** (from *provenance*) is an autonomous intelligence desk for Base projects.
 > Projects apply to be listed; the desk investigates them from public opinion

@@ -63,7 +63,7 @@ export default function Landing() {
           The desk that
           <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
             {" "}
-            never forgets a rug
+            never forgets
           </span>
           .
         </h1>
