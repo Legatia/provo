@@ -170,12 +170,16 @@ Convex agent (TS, cloud) --HTTPS--> sibyl-bridge (FastAPI, sibyl-bridge/) --> si
       investigate / review actions; live balance + burn history on the Monitor card
       and in the activity feed. *Live and verified: sweep burned −1 (balance 1000→999).
       The alert burn arrives with alert delivery.*
-- [ ] **x402 top-up:** `POST /credits` → 402 + USDC terms → credits minted; buyer
-      script (`x402-fetch`); **fund the demo wallet with a few dollars of Base USDC
-      early**
-- [ ] **Alert delivery:** finding/verdict events → webhook (+ Farcaster DM once Phase 3
+- [x] **x402 top-up:** `GET /api/credits?credits=N` → 402 + USDC terms on Base →
+      settle → credits minted (facilitator path wired; dev-settlement for demos).
+      *Live: 402 terms verified at $0.01/credit, dev settle minted +100 (balance 1099).
+      Buyer script: scripts/x402-buy.mjs. Fund the demo wallet with a few dollars of
+      Base USDC before filming.*
+- [x] **Alert delivery:** finding/verdict events → webhook (+ Farcaster DM once Phase 3
       lands); recurrence-aware alert copy ("looks like the Aug RPC incident") — Sibyl
-      recall is what makes alerts smart (load-bearing, demo it)
+      recall is what makes alerts smart (load-bearing, demo it). *Live: verdict alert
+      fired with memory-recurrence line, −1 credit; set ALERT_WEBHOOK_URL or
+      companies.alertWebhook to deliver externally.*
 - [ ] **Featuring:** x402 `POST /feature` → 402 + USDC terms (~$1) → paid slot on the
       board top; sentiment + verdict **stay visible** beside the slot (integrity beat).
       *The "Featured · demo placement" label is live; the payment rail is not wired yet.*

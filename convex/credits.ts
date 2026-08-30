@@ -105,6 +105,27 @@ export const grant = mutation({
   },
 });
 
+/** x402 settlement: mint credits after payment verification (http.ts calls this). */
+export const settle = internalMutation({
+  args: { credits: v.number(), detail: v.string() },
+  handler: async (ctx, args) => {
+    const company = await ctx.db.query("companies").first();
+    if (!company) throw new Error("Run setup first");
+    const balanceAfter = Math.round(((company.creditBalance ?? 0) + args.credits) * 10) / 10;
+    await ctx.db.patch(company._id, { creditBalance: balanceAfter });
+    await ctx.db.insert("creditLedger", {
+      company: company._id,
+      kind: "topup",
+      amount: args.credits,
+      action: "x402_topup",
+      detail: args.detail,
+      balanceAfter,
+      at: now(),
+    });
+    return balanceAfter;
+  },
+});
+
 /** Balance + recent ledger rows for the Monitor card. */
 export const getBalance = query({
   args: {},

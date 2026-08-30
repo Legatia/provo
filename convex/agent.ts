@@ -699,6 +699,18 @@ export const investigateIssue = internalAction({
         detail: `Found ${added} corroborating evidence items · confidence ${confidence}%`,
       });
 
+      // ALERT: Monitor subscription — escalation or recurrence fires an alert
+      // (recurrence copy comes from Sibyl recall)
+      if (newStatus !== issue.status || history.historicalNote) {
+        await ctx.runAction(internal.alerts.sendAlert, {
+          company: issue.company,
+          kind: "finding",
+          title: `${issue.title} — now ${newStatus}`,
+          body: assessment.reasoningSummary ?? issue.description,
+          recurrence: history.historicalNote ?? undefined,
+        });
+      }
+
       // 6. REPORT if important enough (employee questions are answered by
       // the thread reply itself — no extra report email needed)
       if (metrics.priorityScore >= REPORT_SCORE_THRESHOLD && args.triggeredBy !== "employee_reply") {

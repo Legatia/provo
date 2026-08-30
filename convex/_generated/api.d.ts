@@ -9,6 +9,7 @@
  */
 
 import type * as agent from "../agent.js";
+import type * as alerts from "../alerts.js";
 import type * as chat from "../chat.js";
 import type * as credits from "../credits.js";
 import type * as crons from "../crons.js";
@@ -40,6 +41,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   agent: typeof agent;
+  alerts: typeof alerts;
   chat: typeof chat;
   credits: typeof credits;
   crons: typeof crons;

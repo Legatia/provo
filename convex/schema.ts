@@ -44,6 +44,9 @@ export default defineSchema({
     // engine credits (see convex/credits.ts): topped up via x402 USDC, burned
     // by every metered engine action. undefined = never metered (lazy demo grant).
     creditBalance: v.optional(v.number()),
+    // Monitor alert delivery (customer's webhook); ALERT_WEBHOOK_URL env is the
+    // global fallback demo target
+    alertWebhook: v.optional(v.string()),
     createdAt: v.number(),
   }),
 

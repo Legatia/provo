@@ -408,6 +408,17 @@ export const investigateApplication = internalAction({
         }
       }
 
+      // ALERT: the listing verdict goes to the applicant-facing monitor feed
+      await ctx.runAction(internal.alerts.sendAlert, {
+        company: company._id,
+        kind: "verdict",
+        title: `${project.name} — listing verdict: ${verdict.verdict}`,
+        body: verdict.summary,
+        recurrence: relevantMemories.length
+          ? `desk memory consulted: ${relevantMemories.map((m) => m.name).join(", ")}`
+          : undefined,
+      });
+
       await ctx.runMutation(internal.state.completeTask, {
         taskId: task,
         detail: `${verdict.verdict.toUpperCase()} · sentiment ${Math.round(verdict.sentimentScore)} · ${memories.length} memories consulted`,
