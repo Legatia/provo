@@ -74,17 +74,25 @@ async function x402(
       ),
     };
   }
-  // synchronous settlement via the facilitator
+  // settlement via the official x402 facilitator: POST {facilitator}/verify
+  // with {x402Version, paymentPayload, paymentRequirements} → {isValid}
+  // (X-PAYMENT from x402 clients is base64url-encoded JSON)
   try {
-    const res = await fetch(`${facilitator.replace(/\/$/, "")}/settle`, {
+    let paymentPayload: any = paymentHeader;
+    try {
+      paymentPayload = JSON.parse(Buffer.from(paymentHeader, "base64url").toString("utf8"));
+    } catch {
+      // not decodable — send as-is and let the facilitator judge it
+    }
+    const res = await fetch(`${facilitator.replace(/\/$/, "")}/verify`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ x402Version: 1, paymentHeader, paymentRequirements: requirements }),
+      body: JSON.stringify({ x402Version: 1, paymentPayload, paymentRequirements: requirements }),
       signal: AbortSignal.timeout(20_000),
     });
-    const out = (await res.json()) as { success?: boolean; transaction?: string; error?: string };
-    if (out.success) return { ok: true };
-    return { ok: false, response: json({ error: "payment settlement failed", detail: out.error ?? null }, 402) };
+    const out = (await res.json()) as { isValid?: boolean; reason?: string };
+    if (out.isValid) return { ok: true };
+    return { ok: false, response: json({ error: "payment settlement failed", detail: out.reason ?? null }, 402) };
   } catch (e: any) {
     return { ok: false, response: json({ error: "facilitator unreachable", detail: e.message }, 502) };
   }
@@ -135,6 +143,29 @@ http.route({
         decidedAt: project.decidedAt,
       },
       note: "verdicts are desk pipeline output with receipts — not editorial claims",
+    });
+  }),
+});
+
+// Featuring rail: paid placement on the board. Payment buys the slot ONLY —
+// the verdict and sentiment stay visible next to it (that's the product).
+// One featured slot at a time: paying rotates the slot.
+http.route({
+  path: "/api/feature",
+  method: "GET",
+  handler: httpAction(async (ctx, req) => {
+    const url = new URL(req.url);
+    const slug = url.searchParams.get("slug");
+    if (!slug) return json({ error: "missing ?slug= parameter" }, 422);
+    const guard = await x402(url, 1.0, `Provo board: featured slot for "${slug}" (7 days)`, req.headers.get("X-PAYMENT"));
+    if (!guard.ok) return guard.response;
+    const result = await ctx.runMutation(internal.projects.setFeatured, { slug });
+    if (!result.ok) return json({ error: result.error }, 404);
+    return json({
+      ok: true,
+      featured: slug,
+      terms: "paid placement · sentiment and verdict stay visible beside the slot",
+      until: result.until,
     });
   }),
 });

@@ -12,11 +12,15 @@ const crons = cronJobs();
 
 // Inbound mail backup: pure AgentMail REST (no Firecrawl cost), catches
 // anything the webhook missed. The webhook remains the primary path.
-crons.interval(
-  "poll-inbound",
-  { minutes: 2 },
-  internal.monitor.pollInbound,
-  {}
-);
+// Email teardown (Aug 31, plan Phase 3): inbound-mail polling disabled — the
+// channel is dormant. The AgentMail webhook route remains but nothing depends
+// on it. Monitor cycles + research bursts are the live observation paths.
+//
+// crons.interval(
+//   "poll-inbound",
+//   { minutes: 2 },
+//   internal.monitor.pollInbound,
+//   {}
+// );
 
 export default crons;

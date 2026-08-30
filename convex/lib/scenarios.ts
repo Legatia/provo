@@ -55,6 +55,7 @@ export const SCENARIOS: Record<ScenarioKey, ScenarioPack> = {
     sources: [
       { name: "Hacker News mentions", kind: "hn", config: { query: "ZephyrSwap" } },
       { name: "Reddit discussions", kind: "reddit_search", config: { query: "ZephyrSwap swaps" } },
+      { name: "Farcaster casts", kind: "farcaster_search", config: { query: "ZephyrSwap" } },
       {
         name: "General web mentions",
         kind: "web_search",

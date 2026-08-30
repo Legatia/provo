@@ -92,6 +92,15 @@ export async function fetchSource(
       return webResearch
         ? fetchSearchItems(`site:reddit.com ${source.config.query}`, "reddit")
         : []; // paid — skipped when paused
+    case "farcaster_search":
+      // Farcaster coverage via indexed cast pages (Firecrawl site-search —
+      // no separate API key; the open, crypto-native social layer)
+      return webResearch
+        ? fetchSearchItems(
+            `site:warpcast.com OR site:far.social ${source.config.query}`,
+            "farcaster"
+          )
+        : [];
     default:
       return [];
   }

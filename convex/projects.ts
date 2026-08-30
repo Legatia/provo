@@ -204,6 +204,7 @@ async function seedBoardInternal(ctx: any): Promise<string> {
         sources: [
           { name: "Hacker News mentions", kind: "hn", config: { query: "Lumen Notes" } },
           { name: "Reddit discussions", kind: "reddit_search", config: { query: "Lumen Notes app" } },
+          { name: "Farcaster casts", kind: "farcaster_search", config: { query: "Lumen Notes" } },
           { name: "General web mentions", kind: "web_search", config: { query: '"Lumen Notes" review OR complaint' } },
         ],
       });
@@ -258,20 +259,28 @@ export const ensureMonitoredEntity = internalMutation({
       .query("companies")
       .filter((q) => q.eq(q.field("name"), args.name))
       .first();
-    if (existing) return existing._id;
-    const id = await ctx.db.insert("companies", {
-      name: args.name,
-      product: args.product,
-      productKeywords: args.productKeywords,
-      webResearchEnabled: args.webResearch,
-      memoryEnabled: args.memory,
-      createdAt: now(),
-    });
-    for (const r of args.rules) {
-      await ctx.db.insert("watchRules", { company: id, enabled: true, ...r });
+    let id = existing?._id;
+    if (!id) {
+      id = await ctx.db.insert("companies", {
+        name: args.name,
+        product: args.product,
+        productKeywords: args.productKeywords,
+        webResearchEnabled: args.webResearch,
+        memoryEnabled: args.memory,
+        createdAt: now(),
+      });
+      for (const r of args.rules) {
+        await ctx.db.insert("watchRules", { company: id, enabled: true, ...r });
+      }
     }
+    // append any sources the entity doesn't have yet (idempotent by name)
+    const have = new Set(
+      (await ctx.db.query("sources").withIndex("by_company", (q) => q.eq("company", id)).collect()).map((s: any) => s.name)
+    );
     for (const s of args.sources) {
-      await ctx.db.insert("sources", { company: id, enabled: true, ...s });
+      if (!have.has(s.name)) {
+        await ctx.db.insert("sources", { company: id, enabled: true, ...s });
+      }
     }
     return id;
   },
@@ -295,6 +304,37 @@ export const startReviewBySlug = mutation({
       projectId: project._id,
     });
     return project._id;
+  },
+});
+
+/** Featuring rail: payment rotates the single featured slot (http.ts calls
+ *  this after x402 settlement). Verdict + sentiment stay visible — always. */
+export const setFeatured = internalMutation({
+  args: { slug: v.string() },
+  handler: async (ctx, args): Promise<{ ok: true; until: number } | { ok: false; error: string }> => {
+    const target = await ctx.db
+      .query("projects")
+      .withIndex("by_slug", (q) => q.eq("slug", args.slug))
+      .first();
+    if (!target) return { ok: false, error: `no such project: ${args.slug}` };
+    if (!target.verdict) {
+      return { ok: false, error: "project has no verdict yet — featuring needs a public dossier beside the slot" };
+    }
+    const all = await ctx.db.query("projects").collect();
+    for (const p of all) {
+      if (p._id !== target._id && p.featured) await ctx.db.patch(p._id, { featured: false });
+    }
+    const until = now() + 7 * 24 * 3600_000;
+    await ctx.db.patch(target._id, { featured: true });
+    await ctx.db.insert("agentTasks", {
+      type: "report",
+      status: "complete",
+      label: `Featured slot sold: ${target.name} (paid placement)`,
+      detail: `verdict stays ${target.verdict} · sentiment stays ${target.sentimentScore ?? "—"} — beside the paid slot`,
+      startedAt: now(),
+      completedAt: now(),
+    });
+    return { ok: true, until };
   },
 });
 

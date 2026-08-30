@@ -1,0 +1,37 @@
+# sibyl-bridge on Fly.io — always-on persistent host (the demo-day answer to
+# "the bridge must not be an ephemeral tunnel"). SQLite lives on the volume.
+#
+# One-time setup:
+#   fly launch --no-deploy --name provo-bridge --region iad
+#   fly volumes create sibyl_data --size 1
+#   fly secrets set SIBYL_BRIDGE_TOKEN=$(openssl rand -hex 24)
+#   fly deploy
+#   npx convex env set SIBYL_BRIDGE_URL https://provo-bridge.fly.dev
+#   npx convex env set SIBYL_BRIDGE_TOKEN <same token>
+#
+# The free-tier Sibyl cap is 5MB — more than enough for demo memory.
+
+app = "provo-bridge"
+primary_region = "iad"
+
+[build]
+
+[env]
+SIBYL_DB_PATH = "/data/memory.db"
+SIBYL_TENANT = "desk"
+
+[[mounts]]
+source = "sibyl_data"
+destination = "/data"
+
+[http_service]
+internal_port = 8123
+force_https = true
+auto_stop_machines = false
+auto_start_machines = true
+min_machines_running = 1
+
+[[http_service.checks]]
+path = "/health"
+interval = "30s"
+timeout = "5s"

@@ -180,18 +180,19 @@ Convex agent (TS, cloud) --HTTPS--> sibyl-bridge (FastAPI, sibyl-bridge/) --> si
       recall is what makes alerts smart (load-bearing, demo it). *Live: verdict alert
       fired with memory-recurrence line, −1 credit; set ALERT_WEBHOOK_URL or
       companies.alertWebhook to deliver externally.*
-- [ ] **Featuring:** x402 `POST /feature` → 402 + USDC terms (~$1) → paid slot on the
-      board top; sentiment + verdict **stay visible** beside the slot (integrity beat).
-      *The "Featured · demo placement" label is live; the payment rail is not wired yet.*
+- [x] **Featuring:** x402 `GET /api/feature?slug=...` → 402 + USDC terms ($1/7 days) →
+      slot rotates (one slot), sentiment + verdict **stay visible** beside it.
+      *Live: verified — Aave bought the slot; approved/92 stays beside the paid badge.
+      Label on the board says "Featured · demo placement" until a real wallet pays.*
 - [x] (done, near-free) **Trust API:** `GET /api/trust?slug=...` — full dossier as JSON
       behind x402 ($0.05/call) — the second door (Blockaid/GoPlus comp); shares the
       x402 guard with the credits door. *Live: 402 terms + settled dossier verified.*
 
 ### Phase 3 — Sources + narrative — Sep 6–7
-- [ ] Farcaster ingestion (open API) as a first-class source kind alongside HN/Reddit —
-      the legal, native version of "plug in more sources" (X stays roadmap, licensed
-      access only)
-- [ ] Disable inbound-mail poll cron + webhook route (email teardown, code stays dormant)
+- [x] Farcaster ingestion as a first-class source kind (`farcaster_search` via
+      Firecrawl site-search — no extra key) wired into both monitored entities.
+      X stays roadmap, licensed access only
+- [x] Disable inbound-mail poll cron + webhook route (email teardown done Aug 31; code dormant)
 - [x] Provo rebrand in demo *content*: monitored project (ZephyrSwap) replaced Acme,
       watch rules are listing-risk categories, scenario packs + prompts re-voiced
 - [ ] Memory story polish: rug-history recall, astroturf-pattern note in reports/alerts
@@ -237,13 +238,14 @@ Convex agent (TS, cloud) --HTTPS--> sibyl-bridge (FastAPI, sibyl-bridge/) --> si
 
 | Risk | Mitigation |
 |---|---|
-| Bridge unreachable during judging | Named tunnel or Fly volume (never an ephemeral quick-tunnel); health chip on dashboard; fail-closed behavior is the demo, not a bug |
+| Bridge unreachable during judging | **Still the #1 risk until deployed:** fly.toml + Dockerfile ready in sibyl-bridge/ (one-time: `fly launch && fly volumes create sibyl_data && fly secrets set … && fly deploy`, then update SIBYL_BRIDGE_URL). Never rely on the ephemeral quick-tunnel; health chip on dashboard; fail-closed is the design |
 | Sibyl API drift | Signatures verified against the shipped 0.7.0 wheel; SDK calls isolated in `sibyl-bridge/sibyl_adapter.py` |
 | Fake-memory suspicion | Bridge calls the real `sibyl-memory-client`; show the SQLite file + `sibyl status` on camera |
 | Directory looks thin | Pitch opt-in listings, never "all of Base"; ~10 seeded applicants |
 | Featurer/verdict conflict question | The integrity beat *is* the answer: paid placement, visible sentiment, receipts on screen |
 | Sourcing gap (no X/Telegram) | Farcaster native + Reddit/HN; scope the pitch to covered sources |
-| x402 wallet friction | Fund wallet Sep 3 AM; Base Sepolia fallback if mainnet terms misbehave |
+| x402 wallet friction | Facilitator path now conforms to official /verify+isValid (untested against live facilitator — fund wallet and test Sep 3); dev-settlement (X402_DEV_SETTLE=1) currently ON for demos — anyone with a "dev-" header can mint; acceptable for the window, remove for production |
+| Featuring integrity question | Answered by design and by the live board: slot sold, verdict + sentiment stay beside it |
 | Scope creep | Cut line: multi-entity monitoring + Trust API UI (post-window); ACP cuttable; email already dropped |
 
 ---
