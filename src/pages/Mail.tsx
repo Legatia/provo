@@ -22,7 +22,7 @@ const ROUTING_META: Record<string, { label: string; cls: string }> = {
 };
 
 const SCENARIO_LABELS: Record<string, string> = {
-  acme: "Acme AI",
+  desk: "ZephyrSwap",
   firecrawl: "Firecrawl",
   agentmail: "AgentMail",
   archived: "Archived",
@@ -99,7 +99,7 @@ export default function Mail() {
   const company = useQuery(api.queries.getCompany, {});
 
   // default filter = the currently active scenario
-  const activeScenario = company?.scenario ?? "acme";
+  const activeScenario = company?.scenario ?? "desk";
   const [filter, setFilter] = useState<string | null>(null);
   const selected = filter ?? activeScenario;
 
@@ -133,7 +133,7 @@ export default function Mail() {
     counts[s] = (counts[s] ?? 0) + 1;
   }
 
-  const tabs = ["all", "acme", "firecrawl", "agentmail", "archived"];
+  const tabs = ["all", "desk", "firecrawl", "agentmail", "archived"];
 
   return (
     <div className="space-y-5">

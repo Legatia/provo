@@ -4,6 +4,7 @@ import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import * as analysis from "./lib/analysis";
 import * as firecrawl from "./lib/firecrawl";
+import * as sibyl from "./lib/sibyl";
 import { clamp, now, WEEK_MS } from "./lib/util";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -115,6 +116,20 @@ export const runMonitorCycle = internalAction({
       const sources = (await ctx.runQuery(internal.queries.listSourcesInternal, {
         company: company._id,
       })) as any[];
+
+      // METER: source sweep (credits.ts)
+      const meter = await ctx.runMutation(internal.credits.burn, {
+        company: company._id,
+        action: "monitor_cycle",
+        detail: `source sweep · ${sources.length} sources`,
+      });
+      if (!meter.ok) {
+        await ctx.runMutation(internal.state.completeTask, {
+          taskId: task,
+          detail: `monitor paused — ${meter.reason}`,
+        });
+        return;
+      }
 
       let fetched = 0;
       let newSignals = 0;
@@ -240,16 +255,67 @@ export const processSignal = internalAction({
       signalId: args.signalId,
     })) as any;
     if (!signal) return;
+
+    // METER: signal classification (credits.ts) — silent: blocked signals don't
+    // each get a ledger row
+    const meter = await ctx.runMutation(internal.credits.burn, {
+      company: signal.company,
+      action: "signal",
+      silent: true,
+    });
+    if (!meter.ok) return;
     const company = (await ctx.runQuery(internal.queries.getCompanyInternal, {})) as any;
 
     const openIssues = (await ctx.runQuery(internal.queries.listIssuesInternal, {
       company: signal.company,
       statuses: ["emerging", "confirmed", "critical", "watching"],
     })) as any[];
-    const resolvedIssues = (await ctx.runQuery(internal.queries.listIssuesInternal, {
-      company: signal.company,
-      statuses: ["resolved"],
-    })) as any[];
+
+    // REMEMBER: decision-time history. When memory is on, this comes from
+    // Sibyl recall over the bridge — never from the Convex resolved-issues
+    // table (memory is load-bearing: bridge down ⇒ decide with NO history,
+    // visibly logged, never a silent fallback).
+    const memoryOn = company?.memoryEnabled ?? false;
+    let resolvedIssues: any[] = [];
+    if (memoryOn) {
+      try {
+        const memories = await sibyl.recall({
+          query: [signal.content, ...(signal.topics ?? [])].join(" ").slice(0, 400),
+          k: 5,
+        });
+        resolvedIssues = memories.map((m) => ({
+          // prefixed ids can never collide with Convex issue ids
+          id: `sibyl:${m.category ?? "memory"}/${m.name}`,
+          title: m.name,
+          description: m.text.slice(0, 600),
+          status: "resolved",
+        }));
+        await ctx.runMutation(internal.state.logTask, {
+          company: signal.company,
+          type: "remember",
+          status: "complete",
+          label: `Sibyl recall: ${memories.length} memor${memories.length === 1 ? "y" : "ies"} fed into clustering`,
+          detail:
+            memories
+              .slice(0, 3)
+              .map((m) => `${m.name} (${m.kind}): ${m.text.slice(0, 110)}`)
+              .join("\n") || "no matching memories — treating as new",
+        });
+      } catch (e: any) {
+        await ctx.runMutation(internal.state.logTask, {
+          company: signal.company,
+          type: "remember",
+          status: "failed",
+          label: "Sibyl recall failed — deciding without historical context",
+          detail: String(e.message ?? e).slice(0, 200),
+        });
+      }
+    } else {
+      resolvedIssues = (await ctx.runQuery(internal.queries.listIssuesInternal, {
+        company: signal.company,
+        statuses: ["resolved"],
+      })) as any[];
+    }
 
     const match = await analysis.matchSignalToIssue({
       signal: {
@@ -275,7 +341,11 @@ export const processSignal = internalAction({
     });
 
     let issueId: any = null;
-    if (match.action === "existing" && match.issueId) {
+    if (
+      match.action === "existing" &&
+      match.issueId &&
+      !String(match.issueId).startsWith("sibyl:") // Sibyl memories are history, not open issues
+    ) {
       issueId = match.issueId;
       await ctx.runMutation(internal.state.linkSignalToIssue, {
         signalId: args.signalId,
@@ -380,6 +450,24 @@ export const investigateIssue = internalAction({
       issue: args.issue,
     });
 
+    // METER: deep dig (credits.ts)
+    const meter = await ctx.runMutation(internal.credits.burn, {
+      company: issue.company,
+      action: "investigation",
+      detail: issue.title,
+    });
+    if (!meter.ok) {
+      await ctx.runMutation(internal.state.patchInvestigation, {
+        investigation: investigationId,
+        patch: { status: "failed", completedAt: now() },
+      });
+      await ctx.runMutation(internal.state.completeTask, {
+        taskId: task,
+        detail: `investigation blocked — ${meter.reason}`,
+      });
+      return;
+    }
+
     // 1. plan
     const fcEnabled = company?.webResearchEnabled ?? firecrawl.enabled();
     const plan = await analysis.planInvestigation({
@@ -449,11 +537,46 @@ export const investigateIssue = internalAction({
         if (ok) added++;
       }
 
-      // 4. REMEMBER: compare with historical issues
-      const resolvedIssues = (await ctx.runQuery(internal.queries.listIssuesInternal, {
-        company: issue.company,
-        statuses: ["resolved"],
-      })) as any[];
+      // 4. REMEMBER: compare with historical issues — Sibyl recall when memory
+      // is on (fail-closed), Convex resolved-issues only when it's off.
+      let resolvedIssues: any[] = [];
+      if (company?.memoryEnabled ?? false) {
+        try {
+          const memories = await sibyl.recall({
+            query: `${issue.title} ${issue.description}`.slice(0, 400),
+            k: 5,
+          });
+          resolvedIssues = memories.map((m) => ({
+            title: m.name,
+            description: m.text.slice(0, 600),
+            resolvedAt: 0,
+          }));
+          await ctx.runMutation(internal.state.logTask, {
+            company: issue.company,
+            type: "remember",
+            status: "complete",
+            label: `Sibyl recall: ${memories.length} memories for historical comparison`,
+            detail:
+              memories
+                .slice(0, 3)
+                .map((m) => `${m.name} (${m.kind}): ${m.text.slice(0, 110)}`)
+                .join("\n") || "no matching memories",
+          });
+        } catch (e: any) {
+          await ctx.runMutation(internal.state.logTask, {
+            company: issue.company,
+            type: "remember",
+            status: "failed",
+            label: "Sibyl recall failed — comparing with no historical context",
+            detail: String(e.message ?? e).slice(0, 200),
+          });
+        }
+      } else {
+        resolvedIssues = (await ctx.runQuery(internal.queries.listIssuesInternal, {
+          company: issue.company,
+          statuses: ["resolved"],
+        })) as any[];
+      }
       const history = await analysis.compareWithHistory({
         issue: {
           title: issue.title,
@@ -514,6 +637,48 @@ export const investigateIssue = internalAction({
           historicalNote: history.historicalNote ?? issue.historicalNote,
         },
       });
+
+      // REMEMBER (write-through): the conclusion lands in Sibyl so future
+      // decisions recall it even after a full Convex wipe.
+      if ((company?.memoryEnabled ?? false) && assessment.reasoningSummary) {
+        const memName = sibyl.slug(issue.title);
+        try {
+          await sibyl.save({
+            kind: "entity",
+            category: "issue_conclusion",
+            name: memName,
+            body: {
+              title: issue.title,
+              status: newStatus,
+              affectedSegment: issue.affectedSegment ?? null,
+              recommendedAction: assessment.recommendedAction ?? null,
+              reasoningSummary: assessment.reasoningSummary,
+              historicalNote: history.historicalNote ?? null,
+            },
+            meta: { issueId: String(args.issue) },
+          });
+          await sibyl.save({
+            kind: "event",
+            text: `Investigated "${issue.title}" — status ${newStatus}, confidence ${confidence}%. ${assessment.reasoningSummary}`,
+            meta: { issueId: String(args.issue) },
+          });
+          await ctx.runMutation(internal.state.logTask, {
+            company: issue.company,
+            type: "remember",
+            status: "complete",
+            label: `Saved conclusion to Sibyl memory: ${issue.title}`,
+            detail: `issue_conclusion/${memName} + journal event`,
+          });
+        } catch (e: any) {
+          await ctx.runMutation(internal.state.logTask, {
+            company: issue.company,
+            type: "remember",
+            status: "failed",
+            label: "Sibyl write-through failed",
+            detail: String(e.message ?? e).slice(0, 200),
+          });
+        }
+      }
 
       await ctx.runMutation(internal.state.patchInvestigation, {
         investigation: investigationId,
@@ -625,7 +790,7 @@ export const reportIssue = internalAction({
       subject: draft.subject,
       bodyText: draft.body,
       sentTo: to,
-      scenario: company?.scenario ?? "acme",
+      scenario: company?.scenario ?? "desk",
       agentmailMessageId: sent?.message_id,
       threadId: sent?.thread_id,
     });

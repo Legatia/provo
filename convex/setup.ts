@@ -3,50 +3,51 @@ import { internal } from "./_generated/api";
 import * as agentmailApi from "./lib/agentmailApi";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// One-time provisioning: the demo company (Acme AI), its watch rules,
-// monitored sources, and the three real AgentMail inboxes.
+// One-time provisioning: the watched project (ZephyrSwap, a fictional listed
+// Base project), the desk's watch rules, monitored sources, and the three real
+// AgentMail inboxes (legacy channel — dormant).
 // Idempotent — safe to run repeatedly.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const AGENT_USERNAME = "customer.intelligence";
-const EMPLOYEE_USERNAME = "maria.acme";
+const EMPLOYEE_USERNAME = "maria.acme"; // shared inboxes — usernames stay stable
 const CUSTOMER_USERNAME = "dana.customer";
 
 const WATCH_RULES = [
   {
-    label: "Product complaints",
-    description: "Customer pain using the product: slow, broken, confusing flows",
-    keywords: ["slow", "broken", "bug", "crash", "error", "fails"],
+    label: "Execution failures",
+    description: "Traders report swaps/transactions failing, hanging, or timing out",
+    keywords: ["failed", "failure", "stuck", "hang", "timeout", "error", "broken"],
   },
   {
-    label: "Pricing complaints",
-    description: "Complaints or churn signals about pricing and packaging",
-    keywords: ["expensive", "price", "pricing", "cost", "refund"],
+    label: "Fund-safety concerns",
+    description: "Reports suggesting users could lose funds: exploits, rugs, drains",
+    keywords: ["rug", "exploit", "drain", "hack", "scam", "lost funds"],
   },
   {
-    label: "Missing features",
-    description: "Repeated requests for features the product lacks",
-    keywords: ["wish", "missing", "no export", "feature request"],
+    label: "Execution quality",
+    description: "Slippage, latency and pricing complaints from active traders",
+    keywords: ["slippage", "latency", "slow", "pending", "confirm"],
   },
   {
-    label: "Competitor comparisons",
-    description: "Public comparisons with competing products",
-    keywords: ["alternative", "switch", "vs", "competitor"],
+    label: "Venue comparisons",
+    description: "Public comparisons with competing DEXes and venues",
+    keywords: ["alternative", "switch", "vs", "better than", "moving to"],
   },
   {
-    label: "Churn signals",
-    description: "Indications customers are leaving or reducing usage",
-    keywords: ["cancel", "leaving", "churn", "downgrade"],
+    label: "Liquidity flight",
+    description: "Signals that liquidity providers or traders are leaving",
+    keywords: ["pull my liquidity", "withdrawing", "leaving", "closing my position"],
   },
 ];
 
 const SOURCES = [
-  { name: "Hacker News mentions", kind: "hn", config: { query: "Acme Assistant" } },
-  { name: "Reddit discussions", kind: "reddit_search", config: { query: "Acme Assistant" } },
+  { name: "Hacker News mentions", kind: "hn", config: { query: "ZephyrSwap" } },
+  { name: "Reddit discussions", kind: "reddit_search", config: { query: "ZephyrSwap swaps" } },
   {
     name: "General web mentions",
     kind: "web_search",
-    config: { query: '"Acme Assistant" review OR complaint' },
+    config: { query: '"ZephyrSwap" failed swap OR slippage OR stuck' },
   },
 ];
 
@@ -71,15 +72,15 @@ export const ensureSetup = action({
     };
 
     const agentInbox = await ensureInbox(AGENT_USERNAME, "Customer Intelligence Agent");
-    const employeeEmail = await ensureInbox(EMPLOYEE_USERNAME, "Maria - Acme AI");
-    const customerEmail = await ensureInbox(CUSTOMER_USERNAME, "Dana - Acme customer");
+    const employeeEmail = await ensureInbox(EMPLOYEE_USERNAME, "Maria - ZephyrSwap ops");
+    const customerEmail = await ensureInbox(CUSTOMER_USERNAME, "Dana - ZephyrSwap trader");
 
     // 2. company + configuration
     const state = await ctx.runMutation(internal.state.getSetupStateInternal, {});
     const companyId = await ctx.runMutation(internal.state.upsertCompanyInternal, {
-      name: "Acme AI",
-      product: "Acme Assistant",
-      productKeywords: ["Acme Assistant", "Acme AI"],
+      name: "ZephyrSwap",
+      product: "ZephyrSwap",
+      productKeywords: ["ZephyrSwap"],
       agentInbox,
       employeeEmail,
       demoCustomerEmail: customerEmail,

@@ -4,7 +4,7 @@ import { api } from "../lib/convex";
 import { Card, Button } from "../components/ui";
 
 const SUGGESTIONS = [
-  "What are customers complaining about this week?",
+  "What is the desk seeing this week?",
   "Which issue is most urgent?",
   "Investigate the checkout issue.",
   "Are competitors seeing the same thing?",
@@ -45,7 +45,7 @@ export default function Chat() {
                 🛰️
               </div>
               <p className="mt-4 text-sm font-medium text-zinc-300">
-                Ask your customer-intelligence agent
+                Ask the desk
               </p>
               <p className="mt-1 max-w-sm text-xs leading-relaxed text-zinc-500">
                 It answers from live Convex state — issues, signals, evidence and investigations —
@@ -122,7 +122,7 @@ export default function Chat() {
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask about customer signals, issues, trends…"
+              placeholder="Ask about findings, signals, trends…"
               className="flex-1 rounded-xl border border-white/[0.09] bg-black/30 px-4 py-2.5 text-[13px] text-zinc-100 placeholder-zinc-600 outline-none transition focus:border-indigo-400/50 focus:bg-black/50"
             />
             <Button type="submit" variant="primary" disabled={busy || !input.trim()}>

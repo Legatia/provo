@@ -63,7 +63,7 @@ export const onMessageReceived = internalMutation({
       threadId: m.threadId,
       fromEmail: m.from,
       classification: "pending",
-      scenario: company.scenario ?? "acme",
+      scenario: company.scenario ?? "desk",
       handledAt: now(),
     });
 

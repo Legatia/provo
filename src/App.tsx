@@ -3,26 +3,22 @@ import { ConvexProvider, useQuery } from "convex/react";
 import { BrowserRouter, NavLink, Route, Routes, useLocation } from "react-router-dom";
 import { convex, api } from "./lib/convex";
 import { LiveDot, timeAgo } from "./components/ui";
-import Overview from "./pages/Overview";
-import Issues from "./pages/Issues";
+import Board from "./pages/Board";
+import ProjectDetail from "./pages/ProjectDetail";
 import IssueDetail from "./pages/IssueDetail";
-import Mail from "./pages/Mail";
 import Chat from "./pages/Chat";
 import DemoPanel from "./pages/DemoPanel";
 
 const NAV = [
-  { to: "/", label: "Overview", icon: "◈", end: true },
-  { to: "/issues", label: "Issues", icon: "◉", badge: "issues" },
-  { to: "/mail", label: "Mail", icon: "✉" },
-  { to: "/chat", label: "Chat", icon: "◍" },
+  { to: "/", label: "Board", icon: "◈", end: true },
+  { to: "/chat", label: "Ask the desk", icon: "◍" },
   { to: "/demo", label: "Demo", icon: "▶" },
 ];
 
 const PAGE_TITLES: Record<string, [string, string]> = {
-  "/": ["Overview", "what changed across the customer's voice"],
-  "/issues": ["Issues", "normalized customer problems, ranked by priority"],
-  "/mail": ["Agent inbox", "real email — routed, investigated, answered"],
-  "/chat": ["Ask the agent", "answers from live state"],
+  "/": ["Project board", "every project has a past — Provo keeps the record"],
+  "/project": ["Project", "dossier · engine · findings"],
+  "/chat": ["Ask the desk", "answers from live state"],
   "/demo": ["Demo scenario", "deterministic walkthrough · every step is real"],
 };
 
@@ -36,8 +32,10 @@ function Header() {
   const [title, subtitle] =
     PAGE_TITLES[location.pathname] ??
     (location.pathname.startsWith("/issues")
-      ? ["Issue", "evidence, timeline and investigation"]
-      : ["Customer Intelligence", ""]);
+      ? ["Finding", "evidence, timeline and investigation"]
+      : location.pathname.startsWith("/project")
+        ? PAGE_TITLES["/project"]
+        : ["Provo", ""]);
 
   return (
     <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-white/[0.06] bg-zinc-950/70 px-8 backdrop-blur-xl">
@@ -47,7 +45,7 @@ function Header() {
       </div>
       <div className="flex items-center gap-3">
         <span className="hidden items-center gap-1.5 rounded-full border border-white/[0.07] bg-white/[0.03] px-2.5 py-1 text-[10px] uppercase tracking-wider text-zinc-500 sm:inline-flex">
-          convex · firecrawl · openai · agentmail
+          convex · firecrawl · openai · sibyl
         </span>
         <span className="font-mono text-xs tabular-nums text-zinc-500">
           {clock.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", second: "2-digit" })}
@@ -68,11 +66,11 @@ function Sidebar() {
       {/* brand */}
       <div className="flex items-center gap-3 px-5 pb-6 pt-6">
         <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500/80 to-violet-600/80 text-base shadow-[0_0_24px_rgba(99,102,241,0.35)]">
-          🛰️
+          🏛️
         </div>
         <div>
           <div className="text-[13px] font-semibold leading-tight tracking-tight">
-            Customer Intelligence
+            Provo
           </div>
           <div className="mt-0.5 flex items-center gap-1.5 text-[10px] font-medium text-emerald-400">
             <LiveDot /> on duty
@@ -97,20 +95,6 @@ function Sidebar() {
           >
             <span className="w-4 text-center text-xs opacity-60">{n.icon}</span>
             <span className="flex-1">{n.label}</span>
-            {n.badge === "issues" && badges && badges.critical + badges.emerging > 0 && (
-              <span className="flex items-center gap-1">
-                {badges.critical > 0 && (
-                  <span className="rounded-full bg-red-500/15 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-red-300">
-                    {badges.critical}
-                  </span>
-                )}
-                {badges.emerging > 0 && (
-                  <span className="rounded-full bg-amber-500/15 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-amber-300">
-                    {badges.emerging}
-                  </span>
-                )}
-              </span>
-            )}
           </NavLink>
         ))}
       </nav>
@@ -123,7 +107,7 @@ function Sidebar() {
           </div>
           <div className="mt-2 flex items-center gap-2">
             <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500/70 to-violet-600/70 text-[10px]">
-              🛰️
+              🏛️
             </span>
             <div className="min-w-0">
               <div className="truncate text-xs font-medium text-zinc-200">
@@ -144,7 +128,7 @@ function Sidebar() {
           </div>
         </div>
         <p className="px-1 text-[9px] leading-relaxed tracking-wide text-zinc-600">
-          observes · investigates · remembers · reports
+          watches · vets · remembers · sells its intel
         </p>
       </div>
     </aside>
@@ -159,10 +143,9 @@ function Shell() {
         <Header />
         <div className="mx-auto max-w-6xl px-8 py-7">
           <Routes>
-            <Route path="/" element={<Overview />} />
-            <Route path="/issues" element={<Issues />} />
+            <Route path="/" element={<Board />} />
+            <Route path="/project/:slug" element={<ProjectDetail />} />
             <Route path="/issues/:issueId" element={<IssueDetail />} />
-            <Route path="/mail" element={<Mail />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/demo" element={<DemoPanel />} />
           </Routes>

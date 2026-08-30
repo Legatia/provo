@@ -5,14 +5,14 @@ import { SCENARIOS, ScenarioKey, rampFor } from "./lib/scenarios";
 import { DAY_MS, now } from "./lib/util";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Deterministic demo scenarios. Each runs the REAL pipeline (real emails,
-// real clustering, real web research). Scenario packs (Acme / Firecrawl /
+// Deterministic demo scenarios. Each runs the REAL pipeline (real messages,
+// real clustering, real web research). Scenario packs (ZephyrSwap / Firecrawl /
 // AgentMail) live in lib/scenarios.ts.
 // ─────────────────────────────────────────────────────────────────────────────
 
 function pack(company: { scenario?: string }) {
-  const key = (company.scenario as ScenarioKey) ?? "acme";
-  return { key, pack: SCENARIOS[key] ?? SCENARIOS.acme };
+  const key = (company.scenario as ScenarioKey) ?? "desk";
+  return { key, pack: SCENARIOS[key] ?? SCENARIOS.desk };
 }
 
 /** Wipe story data. emailRouting is intentionally KEPT: it is the mail
@@ -44,7 +44,7 @@ export const resetDemo = mutation({
 });
 
 /**
- * Retarget the whole product at a scenario (acme | firecrawl | agentmail):
+ * Retarget the engine at a scenario (desk | firecrawl | agentmail):
  * rewrites company identity + sources and wipes story data.
  */
 export const configureScenario = mutation({
@@ -178,6 +178,10 @@ export const seedHistory = mutation({
       startedAt: now(),
       completedAt: now(),
     });
+
+    // long-term history lives in Sibyl, not Convex — mirror the seeded
+    // resolved incident into the memory bridge (idempotent)
+    await ctx.scheduler.runAfter(0, internal.memory.seedResolvedHistory, {});
 
     return "history seeded";
   },

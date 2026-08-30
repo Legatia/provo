@@ -17,7 +17,7 @@ import { Link, useParams } from "react-router-dom";
 
 const KIND_META: Record<string, { icon: string; label: string; tint: string }> = {
   signal: { icon: "🌐", label: "public discussion", tint: "text-zinc-400" },
-  email: { icon: "📧", label: "customer email", tint: "text-emerald-300" },
+  email: { icon: "📧", label: "inbound message", tint: "text-emerald-300" },
   web: { icon: "🔍", label: "web evidence", tint: "text-indigo-300" },
   historical: { icon: "🕘", label: "historical", tint: "text-violet-300" },
 };

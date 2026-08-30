@@ -66,3 +66,35 @@ export const storeCredits = internalMutation({
     await ctx.db.patch(company._id, { webResearchCredits: args.credits });
   },
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Long-term memory (Sibyl) control — same pattern as the Firecrawl toggle.
+// When enabled, decision-time history comes from Sibyl recall (fail-closed:
+// no fallback to Convex history). The bridge health shown next to the toggle
+// is refreshed on every flip and via Demo panel → "Test bridge".
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const getMemory = query({
+  args: {},
+  handler: async (ctx) => {
+    const company = await ctx.db.query("companies").first();
+    return {
+      enabled: company?.memoryEnabled ?? false,
+      health: company?.memoryHealth ?? null,
+      configured: !!(process.env.SIBYL_BRIDGE_URL && process.env.SIBYL_BRIDGE_TOKEN),
+      configuredCompany: !!company,
+    };
+  },
+});
+
+export const setMemory = mutation({
+  args: { enabled: v.boolean() },
+  handler: async (ctx, args) => {
+    const company = await ctx.db.query("companies").first();
+    if (!company) throw new Error("Run setup first");
+    await ctx.db.patch(company._id, { memoryEnabled: args.enabled });
+    // refresh the bridge health shown next to the toggle
+    await ctx.scheduler.runAfter(0, internal.memory.checkBridgeInternal, {});
+    return args.enabled;
+  },
+});

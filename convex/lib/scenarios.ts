@@ -1,11 +1,11 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// Demo scenario packs. Each pack retargets the whole product at a real company:
-// company config, monitored sources, the agent's seeded history, the ramp of
-// public signals, and the customer email text. Web evidence is always real —
+// Demo scenario packs. Each pack retargets the engine at a watched project:
+// project config, monitored sources, the desk's seeded history, the ramp of
+// public signals, and the inbound message text. Web evidence is always real —
 // for real products, investigations search the product name directly.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type ScenarioKey = "acme" | "firecrawl" | "agentmail";
+export type ScenarioKey = "desk" | "firecrawl" | "agentmail";
 
 export type ScenarioPack = {
   key: ScenarioKey;
@@ -44,55 +44,54 @@ export type ScenarioPack = {
 };
 
 export const SCENARIOS: Record<ScenarioKey, ScenarioPack> = {
-  // ───────────────────────────────────────────────────────────────────────
-  acme: {
-    key: "acme",
+  desk: {
+    key: "desk",
     company: {
-      name: "Acme AI",
-      product: "Acme Assistant",
-      productKeywords: ["Acme Assistant", "Acme AI"],
+      name: "ZephyrSwap",
+      product: "ZephyrSwap",
+      productKeywords: ["ZephyrSwap"],
       realProduct: false,
     },
     sources: [
-      { name: "Hacker News mentions", kind: "hn", config: { query: "Acme Assistant" } },
-      { name: "Reddit discussions", kind: "reddit_search", config: { query: "Acme Assistant" } },
+      { name: "Hacker News mentions", kind: "hn", config: { query: "ZephyrSwap" } },
+      { name: "Reddit discussions", kind: "reddit_search", config: { query: "ZephyrSwap swaps" } },
       {
         name: "General web mentions",
         kind: "web_search",
-        config: { query: '"Acme Assistant" review OR complaint' },
+        config: { query: '"ZephyrSwap" failed swap OR slippage OR stuck' },
       },
     ],
     history: {
       resolvedIssue: {
-        title: "Checkout latency (desktop)",
+        title: "Swap confirmations hanging (mobile web)",
         description:
-          "Desktop checkout took 20s+ for a subset of users during payment processing.",
+          "Swap transactions on mobile web sat pending 30s+ before confirming or failing outright for a subset of traders.",
         severity: "high",
-        affectedSegment: "desktop users",
+        affectedSegment: "mobile-web traders",
         reasoningSummary:
-          "Correlated with payment provider timeout metrics between Aug 12–18.",
+          "Correlated with fallback RPC provider latency metrics between Aug 12–18.",
         resolutionNote:
-          "Root cause: payment provider timeout budget too low under load. Fixed Aug 18 by raising the timeout budget.",
+          "Root cause: fallback RPC timeout budget too low under load. Fixed Aug 18 by raising the timeout and adding a second provider.",
         firstDetectedDaysAgo: 17,
         resolvedDaysAgo: 11,
       },
       signals: [
         {
           content:
-            "Anyone else seeing Acme Assistant checkout take forever on desktop? Spinning for like 20 seconds at payment.",
+            "ZephyrSwap swaps stuck pending on mobile web for ages before they confirm. Anyone else?",
           daysBack: 17,
           source: "hacker_news",
           author: "dkl9",
         },
         {
           content:
-            "Desktop checkout is unusable today. Card step hangs then fails. Support ticket #4812 opened.",
+            "Swap hung 20s then failed after signing. Ticket #4812 opened with screen recording.",
           daysBack: 15,
           source: "email",
           author: "marcus_p",
         },
         {
-          content: "Checkout latency on desktop back to normal for us as of this morning.",
+          content: "Swap confirmations back to normal on mobile web as of this morning.",
           daysBack: 11,
           source: "hacker_news",
           author: "sarah_builds",
@@ -100,19 +99,19 @@ export const SCENARIOS: Record<ScenarioKey, ScenarioPack> = {
       ],
       baselines: [
         {
-          title: "Pricing complaints",
-          description: "Recurring grumbles that the Pro plan got expensive after the repricing.",
+          title: "Taker-fee complaints",
+          description: "Recurring grumbles that taker fees rose after the v2 migration.",
           severity: "low",
-          segment: "pro plan",
-          recommended: "Keep watching; consider packaging note in next release comms.",
+          segment: "active traders",
+          recommended: "Keep watching; consider a fee note in the next release comms.",
           thisWeek: 2,
           prevWeek: 5,
           signals: [
-            ["$49 for Pro is steep for what I use it for, honestly.", 20, "reddit"],
-            ["Considering downgrading after the price change.", 14, "email"],
-            ["Pricing feels off vs value lately.", 9, "hacker_news"],
-            ["Still salty about Pro pricing but the product works.", 6, "reddit"],
-            ["Renewal coming up, evaluating alternatives on cost.", 4, "email"],
+            ["Taker fees post-v2 are steep for smaller trades, honestly.", 20, "reddit"],
+            ["Considering moving size to another DEX after the fee change.", 14, "email"],
+            ["Fees feel off vs value lately.", 9, "hacker_news"],
+            ["Still salty about v2 fees but the execution is good.", 6, "reddit"],
+            ["Evaluating venues on cost ahead of renewing our market-making bot.", 4, "email"],
           ].map(([content, daysBack, source]) => ({
             content: content as string,
             daysBack: daysBack as number,
@@ -120,20 +119,20 @@ export const SCENARIOS: Record<ScenarioKey, ScenarioPack> = {
           })),
         },
         {
-          title: "CSV export requests",
-          description: "Customers repeatedly ask for CSV export of their assistant logs.",
+          title: "SDK / bot API requests",
+          description: "Traders repeatedly ask for a public SDK and bot API for programmatic trading.",
           severity: "low",
-          segment: "all users",
+          segment: "all traders",
           recommended: "Already on roadmap (Q4) — keep tracking volume.",
           thisWeek: 3,
           prevWeek: 3,
           signals: [
-            ["Would love a CSV export of my logs for BI.", 21, "email"],
-            ["Any way to export history to CSV? Can't find it.", 12, "reddit"],
-            ["+1 for CSV export, need it for compliance.", 8, "hacker_news"],
-            ["Export feature is the only thing keeping me on a manual workflow.", 5, "email"],
-            ["CSV export please!", 3, "reddit"],
-            ["Asked support about CSV export again this week.", 2, "email"],
+            ["Would love a TS SDK for my trading bot.", 21, "email"],
+            ["Any way to submit orders programmatically? Can't find docs.", 12, "reddit"],
+            ["+1 for a public API, need it for my strategy.", 8, "hacker_news"],
+            ["SDK is the only thing keeping me on a manual workflow.", 5, "email"],
+            ["SDK please!", 3, "reddit"],
+            ["Asked about the bot API again this week.", 2, "email"],
           ].map(([content, daysBack, source]) => ({
             content: content as string,
             daysBack: daysBack as number,
@@ -143,19 +142,18 @@ export const SCENARIOS: Record<ScenarioKey, ScenarioPack> = {
       ],
     },
     customerEmail: {
-      subject: "Checkout painfully slow on my phone",
+      subject: "Swaps hanging on mobile web — can't close my position",
       text:
-        "Hi — I've been trying to buy a Pro plan all morning and checkout on my phone (iPhone, Safari) takes forever. " +
-        "The spinner sits at the payment step for 30+ seconds and twice it just failed. " +
-        "It worked fine on my laptop last week. Is anyone else seeing this? About to give up and stay on free.\n\n— Dana",
+        "Hi — I've been trying to reduce my perp position on ZephyrSwap from my phone (iPhone, Safari) all morning. " +
+        "The confirm sits pending for 30+ seconds and twice it failed after I signed. " +
+        "It worked fine from my laptop last week. Is anyone else seeing this? About to pull my liquidity over it.\n\n— Dana",
     },
     questions: {
-      q1: "Is this only affecting mobile users?",
-      q2: "Are competitors seeing the same thing?",
+      q1: "Is this only hitting mobile-web traders?",
+      q2: "Are other DEXes seeing the same swap failures?",
     },
   },
 
-  // ───────────────────────────────────────────────────────────────────────
   firecrawl: {
     key: "firecrawl",
     company: {
@@ -420,28 +418,28 @@ export function rampFor(scenario: ScenarioKey): [string, number, number, string,
     ["Our delayed-webhook rate jumped 5x this week at constant volume.", 0, 1, "hacker_news", 82, "webhook users"],
   ];
 
-  const acmeRamp: [string, number, number, string, number, string][] = [
-    ["Checkout on Acme Assistant felt sluggish yesterday, desktop fine though.", 9, 0, "reddit", 45, "unknown"],
-    ["Anyone's mobile checkout slow on Acme? Mine timed out once.", 8, 0, "reddit", 50, "mobile users"],
-    ["Mobile web checkout hanging at payment. Worked around by using desktop.", 7, 0, "hacker_news", 55, "mobile users"],
-    ["Acme Assistant checkout took ~15s on my phone this weekend.", 6, 0, "reddit", 50, "mobile users"],
-    ["Seeing slow checkout on mobile too (Pixel/Chrome).", 6, 0, "hacker_news", 50, "mobile users"],
-    ["Mobile checkout is genuinely broken for me now. 3 failures today.", 4, 12, "reddit", 70, "mobile users"],
-    ["Second day in a row checkout hangs on mobile. Support chat no help.", 4, 6, "email", 72, "mobile users"],
-    ["Can't upgrade plan — checkout spins forever on iOS.", 3, 18, "reddit", 70, "mobile users"],
-    ["Acme Assistant mobile checkout = 30 second spinner. Desktop instant.", 3, 10, "hacker_news", 65, "mobile users"],
-    ["Tried 4 times to check out on my phone. Gave up.", 3, 4, "reddit", 78, "mobile users"],
-    ["Checkout on mobile unusable since Tuesday it seems.", 2, 20, "hacker_news", 68, "mobile users"],
-    ["Same here — mobile checkout dead slow, desktop fine.", 2, 14, "reddit", 66, "mobile users"],
-    ["Almost churned today because mobile checkout kept failing.", 2, 8, "email", 80, "mobile users"],
-    ["Anyone else seeing Acme mobile checkout issues? Multiple reports in our Slack.", 2, 2, "hacker_news", 72, "mobile users"],
-    ["Checkout latency on mobile is really bad this week.", 1, 20, "reddit", 70, "mobile users"],
-    ["Two customers complained to us about slow mobile checkout on Acme.", 1, 12, "email", 74, "mobile users"],
-    ["Mobile payments timing out on Acme Assistant. Reproducible on LTE+WiFi.", 1, 5, "hacker_news", 76, "mobile users"],
-    ["/r/SaaS thread: Acme Assistant checkout slow on mobile — multiple confirmations.", 0, 8, "reddit", 78, "mobile users"],
-    ["Third customer escalation today about mobile checkout. This is spreading.", 0, 4, "email", 84, "mobile users"],
-    ["Mobile checkout timeout count on our side jumped 5x this week.", 0, 1, "hacker_news", 82, "mobile users"],
+  const deskRamp: [string, number, number, string, number, string][] = [
+    ["ZephyrSwap swaps felt sluggish on mobile web yesterday, desktop fine though.", 9, 0, "reddit", 45, "unknown"],
+    ["Anyone's ZephyrSwap trade slow to confirm on mobile? Timed out once on me.", 8, 0, "reddit", 50, "mobile-web traders"],
+    ["Mobile web swap hanging at confirm. Worked around by using desktop.", 7, 0, "hacker_news", 55, "mobile-web traders"],
+    ["A ZephyrSwap swap took ~15s to confirm on my phone this weekend.", 6, 0, "reddit", 50, "mobile-web traders"],
+    ["Seeing slow swap confirms on mobile too (Pixel/Chrome).", 6, 0, "hacker_news", 50, "mobile-web traders"],
+    ["Mobile swaps genuinely broken for me now. 3 failed transactions today.", 4, 12, "reddit", 70, "mobile-web traders"],
+    ["Second day in a row swaps hang on mobile web. Discord support no help.", 4, 6, "email", 72, "mobile-web traders"],
+    ["Can't reduce my perp position — swap spins forever on iOS. Uncomfortable leverage.", 3, 18, "reddit", 70, "mobile-web traders"],
+    ["ZephyrSwap mobile web = 30 second confirms. Desktop instant.", 3, 10, "hacker_news", 65, "mobile-web traders"],
+    ["Tried 4 times to close a position on my phone. Gave up.", 3, 4, "reddit", 78, "mobile-web traders"],
+    ["Mobile swaps unusable since Tuesday it seems.", 2, 20, "hacker_news", 68, "mobile-web traders"],
+    ["Same here — swaps dead slow on mobile, desktop fine.", 2, 14, "reddit", 66, "mobile-web traders"],
+    ["Nearly pulled my liquidity today because mobile swaps kept failing.", 2, 8, "email", 80, "mobile-web traders"],
+    ["Anyone else seeing ZephyrSwap mobile issues? Multiple reports in our trading group.", 2, 2, "hacker_news", 72, "mobile-web traders"],
+    ["Swap confirm latency on mobile web is really bad this week.", 1, 20, "reddit", 70, "mobile-web traders"],
+    ["Two traders in our DAO complained about failed mobile swaps on ZephyrSwap.", 1, 12, "email", 74, "mobile-web traders"],
+    ["Mobile swaps timing out on ZephyrSwap. Reproducible on LTE + WiFi.", 1, 5, "hacker_news", 76, "mobile-web traders"],
+    ["/r/degentrading thread: ZephyrSwap swaps slow on mobile — multiple confirmations.", 0, 8, "reddit", 78, "mobile-web traders"],
+    ["Third trader escalation today about mobile swaps. This is spreading.", 0, 4, "email", 84, "mobile-web traders"],
+    ["Mobile swap failure rate on our side jumped 5x this week.", 0, 1, "hacker_news", 82, "mobile-web traders"],
   ];
 
-  return { firecrawl: firecrawlRamp, agentmail: agentmailRamp, acme: acmeRamp }[scenario];
+  return { firecrawl: firecrawlRamp, agentmail: agentmailRamp, desk: deskRamp }[scenario];
 }

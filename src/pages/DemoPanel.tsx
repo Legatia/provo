@@ -8,13 +8,13 @@ const SCENARIO_COPY: Record<
   string,
   { label: string; product: string; step2: string; step3: string; q1: string; q2: string }
 > = {
-  acme: {
-    label: "Acme AI",
-    product: "Acme Assistant (fictional)",
-    step2: "Dana sends a real email to the agent's inbox about slow mobile checkout. The webhook classifies it and a signal is created.",
-    step3: "20 scenario signals arrive over ~20s. Watch the agent cluster them, watch the issue grow, and auto-trigger an investigation.",
-    q1: 'Maria asks: "Is this only affecting mobile users?"',
-    q2: 'Maria asks: "Are competitors seeing the same thing?"',
+  desk: {
+    label: "ZephyrSwap",
+    product: "ZephyrSwap · listed project, deeply monitored",
+    step2: "A trader's message lands in the desk's legacy inbox: swaps hanging on mobile web. It's classified and becomes a signal.",
+    step3: "20 signals arrive over ~20s: a swap-failure pattern. Watch the desk cluster them, watch the finding grow, and auto-trigger an investigation.",
+    q1: 'Maria asks: "Is this only hitting mobile-web traders?"',
+    q2: 'Maria asks: "Are other DEXes seeing the same swap failures?"',
   },
   firecrawl: {
     label: "Firecrawl",
@@ -208,6 +208,87 @@ function WebResearchCard() {
   );
 }
 
+function MemoryCard() {
+  const status = useQuery(api.settings.getMemory, {});
+  const setMemory = useMutation(api.settings.setMemory);
+  const testBridge = useAction(api.memory.checkBridge);
+  const [busy, setBusy] = useState(false);
+  const [testing, setTesting] = useState(false);
+
+  const on = status?.enabled ?? false;
+  const health = status?.health ?? null;
+  const ok = health?.ok === true;
+
+  return (
+    <Card className="p-4">
+      <SectionTitle>Long-term memory · Sibyl</SectionTitle>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <span
+            className={`flex h-2 w-2 rounded-full ${
+              on
+                ? ok
+                  ? "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.7)]"
+                  : "bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.7)]"
+                : "bg-zinc-600"
+            }`}
+          />
+          <span
+            className={`text-[12.5px] font-medium ${
+              on ? (ok ? "text-emerald-300" : "text-amber-300") : "text-zinc-400"
+            }`}
+          >
+            {on ? (ok ? "Enabled · bridge ok" : "Enabled · bridge down") : "Off"}
+          </span>
+        </div>
+        <button
+          onClick={async () => {
+            setBusy(true);
+            try {
+              await setMemory({ enabled: !on });
+            } finally {
+              setBusy(false);
+            }
+          }}
+          disabled={busy || !status?.configuredCompany || !status?.configured}
+          className={`relative h-6 w-11 shrink-0 rounded-full border transition-all duration-200 disabled:opacity-40 ${
+            on ? "border-emerald-500/40 bg-emerald-500/25" : "border-white/10 bg-white/[0.06]"
+          }`}
+          aria-label={on ? "Disable Sibyl memory" : "Enable Sibyl memory"}
+        >
+          <span
+            className={`absolute top-1/2 h-4 w-4 -translate-y-1/2 rounded-full transition-all duration-200 ${
+              on ? "left-[22px] bg-emerald-300" : "left-[3px] bg-zinc-400"
+            }`}
+          />
+        </button>
+      </div>
+      <div className="mt-2.5 flex items-center justify-between font-mono text-[10px]">
+        <span className="text-zinc-500">{health ? health.detail : "bridge not checked"}</span>
+        <button
+          onClick={async () => {
+            setTesting(true);
+            try {
+              await testBridge({});
+            } finally {
+              setTesting(false);
+            }
+          }}
+          disabled={testing || !status?.configured}
+          className="rounded border border-white/10 px-1.5 py-0.5 text-zinc-400 transition-colors hover:border-white/25 hover:text-zinc-200 disabled:opacity-40"
+        >
+          {testing ? "…" : "test"}
+        </button>
+      </div>
+      <p className="mt-2.5 border-t border-white/[0.06] pt-2.5 text-[10.5px] leading-relaxed text-zinc-600">
+        {on
+          ? "Decision-time history comes from Sibyl recall — wipe Convex and it survives. If the bridge is down, the desk decides with no history (that's the point)."
+          : "Memory off: history reads come from Convex only. Turn on after seeding (Demo → Seed history) with the bridge reachable."}
+      </p>
+    </Card>
+  );
+}
+
 function Step({
   n,
   title,
@@ -284,8 +365,8 @@ export default function DemoPanel() {
   const reports = useQuery(api.queries.listReports, {});
   const inbox = useQuery(api.email.getAgentInbox, {});
 
-  const scenario = company?.scenario ?? "acme";
-  const copy = SCENARIO_COPY[scenario] ?? SCENARIO_COPY.acme;
+  const scenario = company?.scenario ?? "desk";
+  const copy = SCENARIO_COPY[scenario] ?? SCENARIO_COPY.desk;
 
   const run = (title: string, fn: () => Promise<any>) => async () => {
     setBusy(title);
@@ -303,6 +384,8 @@ export default function DemoPanel() {
   const customerEmail = useMutation(api.demo.sendCustomerComplaint);
   const seedSignals = useMutation(api.demo.seedPublicSignals);
   const employeeAsk = useMutation(api.demo.employeeAsk);
+  const seedBoard = useAction(api.projects.seedBoard);
+  const startReview = useMutation(api.projects.startReviewBySlug);
   const investigateNow = useMutation(api.chat.runInvestigationNow);
 
   const rampedIssue = issues?.find((i: any) =>
@@ -344,12 +427,38 @@ export default function DemoPanel() {
 
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <p className="text-[13px] text-zinc-400">
-          The Acme AI scenario, step by step — every button runs the real pipeline.
+          The engine walkthrough — every button runs the real pipeline.
         </p>
         <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-zinc-500">
           <LiveDot /> live
         </span>
       </div>
+
+      {/* Provo board demo */}
+      <Card>
+        <div className="border-b border-white/[0.06] px-5 py-3.5">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
+            Provo · the project board
+          </span>
+        </div>
+        <div className="divide-y divide-white/[0.04]">
+          <Step
+            n="B1"
+            title="Seed the board"
+            desc="9 fictional applicants (one pre-featured, paid placement) + the Aurum rug history written into Sibyl — the only place it exists. Idempotent."
+            busy={busy}
+            onClick={run("Seed the board", () => seedBoard({}))}
+          />
+          <Step
+            n="B2"
+            title="Zenith Finance applies — desk review"
+            desc="Live listing review of the demo star: Sibyl recall (Aurum rug, same team) + public-opinion research → verdict on the Board tab. Memory ON = flagged; memory OFF = blind approval. The counterfactual."
+            busy={busy}
+            last
+            onClick={run("Zenith desk review", () => startReview({ slug: "zenith-finance" }))}
+          />
+        </div>
+      </Card>
 
       <div className="grid gap-5 lg:grid-cols-3">
         <Card className="lg:col-span-2">
@@ -426,6 +535,7 @@ export default function DemoPanel() {
         <div className="space-y-4">
           <LiveResearchCard />
           <WebResearchCard />
+          <MemoryCard />
 
           <Card className="p-4">
             <SectionTitle>Live state</SectionTitle>

@@ -2,3 +2,5 @@
 node_modules
 screenshots/
 .vercel
+dist/
+tsconfig.tsbuildinfo

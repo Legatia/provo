@@ -103,7 +103,7 @@ export default function Issues() {
           <EmptyState
             icon="◉"
             title="No issues yet"
-            hint="When customer signals cluster, the agent opens a normalized issue with evidence and a priority score."
+            hint="When public-opinion signals cluster, the desk opens a normalized finding with evidence and a priority score."
           />
         </Card>
       )}

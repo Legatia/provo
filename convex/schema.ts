@@ -23,6 +23,13 @@ export default defineSchema({
     // undefined falls back to the FIRECRAWL_ENABLED env var.
     webResearchEnabled: v.optional(v.boolean()),
     webResearchCredits: v.optional(v.number()), // last known Firecrawl credit balance
+    // long-term memory (Sibyl) toggle — controlled from the dashboard.
+    // When on, decision-time history comes from Sibyl recall over the bridge,
+    // never from Convex resolved-issues (memory is load-bearing).
+    memoryEnabled: v.optional(v.boolean()),
+    memoryHealth: v.optional(
+      v.object({ ok: v.boolean(), detail: v.string(), checkedAt: v.number() })
+    ),
     // live research burst (demo): bounded start/stop web-sweeping session
     researchSession: v.optional(
       v.object({
@@ -34,8 +41,22 @@ export default defineSchema({
         signalsFound: v.number(),
       })
     ),
+    // engine credits (see convex/credits.ts): topped up via x402 USDC, burned
+    // by every metered engine action. undefined = never metered (lazy demo grant).
+    creditBalance: v.optional(v.number()),
     createdAt: v.number(),
   }),
+
+  // Credit ledger — every top-up and burn, with the balance after the event.
+  creditLedger: defineTable({
+    company: v.id("companies"),
+    kind: v.string(), // "topup" | "burn"
+    amount: v.number(), // signed credits (+top-up / −burn / 0 for blocked)
+    action: v.optional(v.string()),
+    detail: v.optional(v.string()),
+    balanceAfter: v.number(),
+    at: v.number(),
+  }).index("by_company_time", ["company", "at"]),
 
   // Monitored public web sources with change detection state.
   sources: defineTable({
@@ -192,4 +213,46 @@ export default defineSchema({
     replySummary: v.optional(v.string()),
     handledAt: v.number(),
   }).index("by_message", ["messageId"]),
+
+  // ── Provo: the project board ───────────────────────────────────────────────
+  // Projects that applied to be listed. The desk investigates each applicant
+  // from public opinion + Sibyl recall (rug history) and issues a verdict.
+  projects: defineTable({
+    name: v.string(),
+    slug: v.string(),
+    tagline: v.string(),
+    chain: v.string(), // "base" | "ethereum" | …
+    links: v.optional(
+      v.object({
+        site: v.optional(v.string()),
+        x: v.optional(v.string()),
+        docs: v.optional(v.string()),
+      })
+    ),
+    teamNote: v.optional(v.string()), // self-declared team info from the application
+    realProduct: v.optional(v.boolean()), // real project → brand-name research queries
+    simulated: v.optional(v.boolean()), // demo simulation (labeled on the board)
+    status: v.string(), // applied | under_review | listed | flagged | rejected
+    verdict: v.optional(v.string()), // approved | flagged | rejected
+    verdictSummary: v.optional(v.string()),
+    sentimentScore: v.optional(v.number()), // 0-100 desk sentiment
+    riskTags: v.array(v.string()),
+    // top web evidence collected during the listing review
+    evidence: v.optional(
+      v.array(
+        v.object({
+          source: v.string(),
+          url: v.optional(v.string()),
+          excerpt: v.string(),
+        })
+      )
+    ),
+    // names of the Sibyl memories the verdict relied on (proof of recall)
+    recalledMemories: v.optional(v.array(v.string())),
+    featured: v.boolean(), // paid placement — sentiment stays visible regardless
+    appliedAt: v.number(),
+    decidedAt: v.optional(v.number()),
+  })
+    .index("by_slug", ["slug"])
+    .index("by_status", ["status"]),
 });

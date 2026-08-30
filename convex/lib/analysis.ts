@@ -504,7 +504,7 @@ export async function chatReply(args: {
   return chatJSON<ChatIntent>({
     model: MODEL_MAIN,
     system:
-      "You are a customer-intelligence agent chatting with your team in an internal dashboard. " +
+      "You are Provo's desk agent, chatting with the desk team in an internal dashboard. " +
       "Answer the user's question from the provided live state context (issues, signals, activity). " +
       "Be concise (2-6 sentences), quantitative when numbers exist, and cite which evidence backs key claims. " +
       "If the user asks to investigate something: set investigateIssueTitle to the matching issue title " +
@@ -534,5 +534,67 @@ export async function chatReply(args: {
       },
     },
     maxTokens: 800,
+  });
+}
+
+// ── 10. Listing verdict (the Provo desk) ────────────────────────────────────
+
+export type ListingVerdict = {
+  verdict: "approved" | "flagged" | "rejected";
+  confidence: number; // 0-100
+  sentimentScore: number; // 0-100 desk sentiment on the project
+  summary: string; // 2-3 sentences, the desk's voice, cites the evidence/memory
+  riskTags: string[]; // short slugs: "prior-rug", "anonymous-team", "unaudited"…
+};
+
+export async function assessListing(args: {
+  project: { name: string; tagline: string; chain: string; teamNote?: string };
+  evidence: { excerpt: string; url?: string; note?: string }[];
+  memories: { name: string; text: string }[];
+}): Promise<ListingVerdict> {
+  return chatJSON<ListingVerdict>({
+    model: MODEL_MAIN,
+    system:
+      "You are the listing desk of Provo, a project intelligence desk for onchain " +
+      "ecosystems. Decide whether a project that applied for listing should be " +
+      "approved, flagged, or rejected. Rules: " +
+      "(1) Recalled memory is authoritative — if the memories show the team behind " +
+      "this project previously ran a rugged, flagged, or scam project, verdict must " +
+      "be 'flagged' or 'rejected' and the summary must cite that history by name. " +
+      "(2) Never invent history: only use the memories provided. If memories are " +
+      "empty, judge from the evidence alone and say the desk has no prior record. " +
+      "(3) Evidence over hallucination: cite specifics (wallet matches, dates, " +
+      "incidents) from evidence and memory, never generic FUD. " +
+      "(4) Only cite figures, dates or amounts that appear in the provided evidence " +
+      "or memories — if you cannot ground a number, describe it qualitatively. " +
+      "(5) sentimentScore (0-100) reflects public-opinion tone about the project. " +
+      "riskTags are short slugs like 'prior-rug', 'anonymous-team', 'unaudited', " +
+      "'copy-paste-contract', 'no-lockup'. " +
+      "summary: 2-3 sentences in the desk's dry, factual voice.",
+    user: JSON.stringify(
+      {
+        application: args.project,
+        public_opinion_evidence: args.evidence,
+        recalled_memories: args.memories,
+      },
+      null,
+      0
+    ),
+    schema: {
+      name: "listing_verdict",
+      schema: {
+        type: "object",
+        properties: {
+          verdict: { type: "string", enum: ["approved", "flagged", "rejected"] },
+          confidence: { type: "number" },
+          sentimentScore: { type: "number" },
+          summary: { type: "string" },
+          riskTags: { type: "array", items: { type: "string" } },
+        },
+        required: ["verdict", "confidence", "sentimentScore", "summary", "riskTags"],
+        additionalProperties: false,
+      },
+    },
+    maxTokens: 700,
   });
 }
