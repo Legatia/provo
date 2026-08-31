@@ -2,7 +2,7 @@
 
 > **Provo** (from *provenance*) is an autonomous intelligence desk for Base projects.
 > Projects apply to be listed; the desk investigates them from public opinion
-> (Farcaster, Reddit, HN), issues evidence-backed verdicts, sells **featured slots**
+> (HN, Reddit, Farcaster via search index), issues evidence-backed verdicts, sells **featured slots**
 > (paid placement — the honest sentiment stays visible next to the slot), and sells
 > **per-project intelligence to agents** via x402. Its long-term memory lives in
 > **Sibyl Memory** — and it is load-bearing: wipe the working state and the desk still
@@ -84,6 +84,16 @@ wedge, not the boundary: it's where the data is legally open (Farcaster, public 
 the payment rails are native (USDC/x402), and the urgency is extreme. Every monitored
 entity in every domain deposits into the same compounding memory corpus — that corpus,
 not the subscriptions, is the business.
+
+## Demo-deployment notes
+
+- Demo/destructive functions (reset, reseed) are key-gated; the demo top-up runs
+  through a key-gated endpoint — the **only** production money path is x402
+  settlement. Remaining console mutations are intentionally unauthenticated for
+  the hackathon demo; auth is first post-window work.
+- `X402_DEV_SETTLE` accepts only the exact secret settlement header during
+  rehearsals and must be removed (with a real `X402_PAYTO_ADDRESS` wallet) for
+  any real transaction.
 
 ## Design principles
 

@@ -252,9 +252,12 @@ export const getCompany = query({
 });
 
 export const getOverview = query({
-  args: {},
-  handler: async (ctx) => {
-    const company = await ctx.db.query("companies").first();
+  args: { entity: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    // entity-scoped when named (multi-entity engine); first() is the fallback
+    const company = args.entity
+      ? await ctx.db.query("companies").filter((q) => q.eq(q.field("name"), args.entity)).first()
+      : await ctx.db.query("companies").first();
     if (!company) return null;
     const issues = await ctx.db
       .query("issues")
@@ -342,9 +345,11 @@ export const listIssues = query({
 
 /** Issues with day-bucketed mention sparklines (for the issues board). */
 export const listIssuesDetailed = query({
-  args: {},
-  handler: async (ctx) => {
-    const company = await ctx.db.query("companies").first();
+  args: { entity: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    const company = args.entity
+      ? await ctx.db.query("companies").filter((q) => q.eq(q.field("name"), args.entity)).first()
+      : await ctx.db.query("companies").first();
     if (!company) return [];
     const issues = await ctx.db
       .query("issues")

@@ -380,6 +380,7 @@ export default function DemoPanel() {
   const configureScenario = useMutation(api.demo.configureScenario);
   const setup = useAction(api.demo.setup);
   const reset = useMutation(api.demo.resetDemo);
+  const DEMO_KEY = (import.meta as any).env.VITE_DEMO_KEY as string | undefined;
   const seedHistory = useMutation(api.demo.seedHistory);
   const customerEmail = useMutation(api.demo.sendCustomerComplaint);
   const seedSignals = useMutation(api.demo.seedPublicSignals);
@@ -427,7 +428,7 @@ export default function DemoPanel() {
 
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <p className="text-[13px] text-paper-dim">
-          The engine walkthrough — every button runs the real pipeline.
+          Engine walkthrough — every button runs the real pipeline. Steps 2 and 4 exercise the legacy email channel (dormant — kept for the original demo).
         </p>
         <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-paper-dim">
           <LiveDot /> live
@@ -464,7 +465,7 @@ export default function DemoPanel() {
         <Card className="lg:col-span-2">
           <div className="border-b border-rule px-5 py-3.5">
             <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-paper-dim">
-              3-minute walkthrough
+              Engine walkthrough · legacy email steps included (channel dormant)
             </span>
           </div>
           <div className="divide-y divide-white/[0.04]">
@@ -527,7 +528,7 @@ export default function DemoPanel() {
               title="Reset demo data"
               desc="Wipes signals, issues, evidence, investigations, reports and chat. Keeps inboxes and config. Old mail is marked as seen so nothing reprocesses."
               busy={busy}
-              onClick={run("Reset demo data", () => reset({}))}
+              onClick={run("Reset demo data", () => reset({ key: DEMO_KEY }))}
             />
           </div>
         </Card>

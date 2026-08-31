@@ -62,7 +62,10 @@ async function x402(
     };
   }
 
-  const devSettle = process.env.X402_DEV_SETTLE === "1" && paymentHeader.startsWith("dev-");
+  // dev settlement requires the exact secret header (dev-<DEMO_KEY>) — a bare
+  // "dev-anything" must NOT settle
+  const demoKey = process.env.DEMO_KEY ?? "";
+  const devSettle = demoKey !== "" && paymentHeader === `dev-${demoKey}`;
   const facilitator = process.env.X402_FACILITATOR_URL;
   if (devSettle) return { ok: true };
   if (!facilitator) {
@@ -73,6 +76,10 @@ async function x402(
         501
       ),
     };
+  }
+  // never route real money to the burn address placeholder
+  if (/^(0x0+)?dEaD$/i.test(payTo.replace(/^0x/, "")) || /^0x0+$/.test(payTo)) {
+    return { ok: false, response: json({ error: "payTo not configured — set X402_PAYTO_ADDRESS to the real receiving wallet" }, 500) };
   }
   // settlement via the official x402 facilitator: POST {facilitator}/verify
   // with {x402Version, paymentPayload, paymentRequirements} → {isValid}
@@ -167,6 +174,23 @@ http.route({
       terms: "paid placement · sentiment and verdict stay visible beside the slot",
       until: result.until,
     });
+  }),
+});
+
+// Demo top-up for the Monitor card — gated by the demo key (the real path is
+// the x402 settlement above; this exists so the presenter can top up demo
+// credits without a wallet during rehearsals).
+http.route({
+  path: "/api/credits/demo",
+  method: "POST",
+  handler: httpAction(async (ctx, req) => {
+    if (!process.env.DEMO_KEY || req.headers.get("X-DEMO-KEY") !== process.env.DEMO_KEY) {
+      return json({ error: "bad demo key" }, 401);
+    }
+    const url = new URL(req.url);
+    const amount = Math.max(1, Math.min(Number(url.searchParams.get("amount") ?? 100), 10_000));
+    const balance = await ctx.runMutation(internal.credits.demoGrant, { amount });
+    return json({ ok: true, balance, note: "demo grant — production path is x402" });
   }),
 });
 

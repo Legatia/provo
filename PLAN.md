@@ -246,6 +246,9 @@ Convex agent (TS, cloud) --HTTPS--> sibyl-bridge (FastAPI, sibyl-bridge/) --> si
 | Sourcing gap (no X/Telegram) | Farcaster native + Reddit/HN; scope the pitch to covered sources |
 | x402 wallet friction | Facilitator path now conforms to official /verify+isValid (untested against live facilitator — fund wallet and test Sep 3); dev-settlement (X402_DEV_SETTLE=1) currently ON for demos — anyone with a "dev-" header can mint; acceptable for the window, remove for production |
 | Featuring integrity question | Answered by design and by the live board: slot sold, verdict + sentiment stay beside it |
+| Judge-poking the payment rail (Aug 31 audit) | dev settlement now requires the exact `dev-<DEMO_KEY>` header; demo top-up moved behind key-gated `/api/credits/demo`; `credits.grant` removed from the public API; facilitator path refuses the burn-address placeholder until a real wallet is set |
+| Cross-entity data bleed (Aug 31 audit) | fixed: Engine/Findings queries are entity-scoped — Lumen's tabs show Lumen's data |
+| Destructive demo ops (Aug 31 audit) | `resetDemo`/`reseedBoard` require the demo key; /mail route removed; legacy email steps relabeled in the demo panel |
 | Scope creep | Cut line: multi-entity monitoring + Trust API UI (post-window); ACP cuttable; email already dropped |
 
 ---

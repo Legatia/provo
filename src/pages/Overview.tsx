@@ -51,8 +51,8 @@ function StatCard({
   );
 }
 
-export default function Overview() {
-  const overview = useQuery(api.queries.getOverview, {});
+export default function Overview({ entity }: { entity?: string }) {
+  const overview = useQuery(api.queries.getOverview, entity ? { entity } : {});
 
   if (overview === undefined) {
     return (

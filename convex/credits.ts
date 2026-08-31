@@ -1,4 +1,4 @@
-import { internalMutation, mutation, query } from "./_generated/server";
+import { internalMutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { now } from "./lib/util";
 
@@ -83,21 +83,21 @@ export const burn = internalMutation({
   },
 });
 
-/** Demo top-up (the x402 rail will call this server-side once wired). */
-export const grant = mutation({
-  args: { amount: v.optional(v.number()) },
+/** Demo top-up — internal only, called by /api/credits/demo (key-gated).
+ *  The real money path is the x402 settlement. */
+export const demoGrant = internalMutation({
+  args: { amount: v.number() },
   handler: async (ctx, args) => {
     const company = await ctx.db.query("companies").first();
     if (!company) throw new Error("Run setup first");
-    const amount = args.amount ?? 100;
-    const balanceAfter = Math.round(((company.creditBalance ?? 0) + amount) * 10) / 10;
+    const balanceAfter = Math.round(((company.creditBalance ?? 0) + args.amount) * 10) / 10;
     await ctx.db.patch(company._id, { creditBalance: balanceAfter });
     await ctx.db.insert("creditLedger", {
       company: company._id,
       kind: "topup",
-      amount,
+      amount: args.amount,
       action: "demo_topup",
-      detail: "demo top-up (x402 rail pending)",
+      detail: "demo top-up via key-gated endpoint (production: x402)",
       balanceAfter,
       at: now(),
     });

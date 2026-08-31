@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { useMutation, useQuery } from "convex/react";
+import { useQuery } from "convex/react";
 import { api } from "../lib/convex";
 import Overview from "./Overview";
 import Issues from "./Issues";
@@ -18,8 +18,13 @@ export default function ProjectDetail() {
   const project = useQuery(api.projects.getProjectBySlug, slug ? { slug } : "skip");
   const monitoredNames = useQuery(api.queries.listMonitoredNames, {});
   const credits = useQuery(api.credits.getBalance, project ? { name: project.name } : "skip");
-  const topUp = useMutation(api.credits.grant);
   const [topping, setTopping] = useState(false);
+  const topUp = async () => {
+    await fetch(
+      `${import.meta.env.VITE_CONVEX_SITE_URL}/api/credits/demo?amount=100`,
+      { method: "POST", headers: { "X-DEMO-KEY": import.meta.env.VITE_DEMO_KEY ?? "" } }
+    );
+  };
   const [tab, setTab] = useState<Tab>("dossier");
 
   if (project === undefined || monitoredNames === undefined) {
@@ -119,7 +124,7 @@ export default function ProjectDetail() {
               onClick={async () => {
                 setTopping(true);
                 try {
-                  await topUp({});
+                  await topUp();
                 } finally {
                   setTopping(false);
                 }
@@ -127,7 +132,7 @@ export default function ProjectDetail() {
               disabled={topping}
               className="rounded-md border border-verdigris/40 bg-verdigris/10 px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-verdigris transition-colors hover:bg-verdigris/20 disabled:opacity-40"
             >
-              {topping ? "…" : "+100 top-up (demo — x402 pending)"}
+              {topping ? "…" : "+100 demo top-up"}
             </button>
           </div>
         </div>
@@ -196,8 +201,8 @@ export default function ProjectDetail() {
         </Card>
       )}
 
-      {tab === "engine" && monitored && <Overview />}
-      {tab === "findings" && monitored && <Issues />}
+      {tab === "engine" && monitored && <Overview entity={project.name} />}
+      {tab === "findings" && monitored && <Issues entity={project.name} />}
 
       {!monitored && tab !== "dossier" && (
         <Card className="p-8 text-center text-[12px] text-paper-dim">

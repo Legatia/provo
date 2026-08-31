@@ -18,8 +18,8 @@ const SEVERITY_BAR: Record<string, string> = {
   low: "bg-brass",
 };
 
-export default function Issues() {
-  const rows = useQuery(api.queries.listIssuesDetailed, {});
+export default function Issues({ entity }: { entity?: string }) {
+  const rows = useQuery(api.queries.listIssuesDetailed, entity ? { entity } : {});
 
   if (rows === undefined)
     return (

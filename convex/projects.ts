@@ -286,6 +286,31 @@ export const ensureMonitoredEntity = internalMutation({
   },
 });
 
+
+// ── grounding filter ─────────────────────────────────────────────────────────
+// "Evidence over hallucination" enforced in code: any summary sentence citing
+// a dollar figure that does not appear in the collected evidence/memory corpus
+// is removed before the verdict is stored. The desk never ships a number it
+// cannot trace.
+
+function groundSummary(
+  summary: string,
+  corpus: string
+): { summary: string; removed: number } {
+  const sentences = summary.split(/(?<=[.!?])\s+/);
+  const corpusNorm = corpus.toLowerCase().replace(/[\s,]/g, "");
+  const kept = sentences.filter((sen) => {
+    const figures = sen.match(/\$\s?\d[\d.,]*\s?(m|k|million|billion)?/gi);
+    if (!figures || figures.length === 0) return true;
+    return figures.every((f) => {
+      const norm = f.toLowerCase().replace(/[\s,]/g, "").replace(/\$$/, "");
+      return corpusNorm.includes(norm.replace("$", "")) || corpusNorm.includes(norm);
+    });
+  });
+  if (kept.length === 0) return { summary, removed: 0 }; // never empty the summary
+  return { summary: kept.join(" "), removed: sentences.length - kept.length };
+}
+
 // ── the desk review (listing investigation) ─────────────────────────────────
 
 export const startReviewBySlug = mutation({
@@ -474,6 +499,14 @@ export const investigateApplication = internalAction({
       const status =
         verdict.verdict === "approved" ? "listed" : verdict.verdict === "flagged" ? "flagged" : "rejected";
 
+      // GROUNDING: strip sentences citing figures absent from evidence/memory
+      const corpus = [
+        ...extracted.map((e) => `${e.excerpt} ${e.note ?? ""}`),
+        ...memories.map((m) => m.text),
+      ].join("\n");
+      const grounded = groundSummary(verdict.summary, corpus);
+      verdict.summary = grounded.summary;
+
       // only surface memories that actually concern this project on the dossier
       // (recall casts a wide net; the verdict prompt sees everything, the
       // dossier shows only what's relevant to this applicant)
@@ -536,7 +569,9 @@ export const investigateApplication = internalAction({
 
       await ctx.runMutation(internal.state.completeTask, {
         taskId: task,
-        detail: `${verdict.verdict.toUpperCase()} · sentiment ${Math.round(verdict.sentimentScore)} · ${memories.length} memories consulted`,
+        detail: `${verdict.verdict.toUpperCase()} · sentiment ${Math.round(verdict.sentimentScore)} · ${memories.length} memories consulted${
+          grounded.removed > 0 ? ` · grounding filter removed ${grounded.removed} ungrounded claim(s)` : ""
+        }`,
       });
     } catch (e: any) {
       await ctx.runMutation(internal.state.completeTask, {

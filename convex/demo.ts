@@ -19,8 +19,11 @@ function pack(company: { scenario?: string }) {
  * history ledger (per-scenario segregation in the Mail tab) and doubles as
  * the dedupe ledger that prevents reprocessing of old mail. */
 export const resetDemo = mutation({
-  args: {},
-  handler: async (ctx) => {
+  args: { key: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    if (process.env.DEMO_KEY && args.key !== process.env.DEMO_KEY) {
+      throw new Error("bad demo key");
+    }
     for (const table of [
       "signals",
       "issues",
