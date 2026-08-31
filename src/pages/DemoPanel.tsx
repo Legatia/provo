@@ -12,7 +12,7 @@ const SCENARIO_COPY: Record<
     label: "ZephyrSwap",
     product: "ZephyrSwap · listed project, deeply monitored",
     step2: "A trader's message lands in the desk's legacy inbox: swaps hanging on mobile web. It's classified and becomes a signal.",
-    step3: "20 signals arrive over ~20s: a swap-failure pattern. Watch the desk cluster them, watch the finding grow, and auto-trigger an investigation.",
+    step3: "20 signals arrive one by one (serialized so clustering sees every prior signal). Watch the desk cluster them into ONE finding, watch it grow, and auto-trigger an investigation.",
     q1: 'Maria asks: "Is this only hitting mobile-web traders?"',
     q2: 'Maria asks: "Are other DEXes seeing the same swap failures?"',
   },

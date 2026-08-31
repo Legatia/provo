@@ -268,8 +268,21 @@ export const runMonitorCycle = internalAction({
 // ── Cluster a signal into issues (with memory of resolved issues) ───────────
 
 export const processSignal = internalAction({
-  args: { signalId: v.id("signals") },
+  args: { signalId: v.id("signals"), queue: v.optional(v.array(v.id("signals"))) },
   handler: async (ctx, args) => {
+    // SERIALIZED PROCESSING: when chained (queue), advance to the next signal
+    // only after this one completes — concurrent processing raced issue
+    // creation (two in-flight signals each saw "no matching issue" and both
+    // created one, fragmenting one story into ~8 duplicates).
+    const advance = async () => {
+      if (args.queue && args.queue.length > 0) {
+        await ctx.scheduler.runAfter(600, internal.agent.processSignal, {
+          signalId: args.queue[0],
+          queue: args.queue.slice(1),
+        });
+      }
+    };
+    try {
     const signal = (await ctx.runQuery(internal.queries.getSignalInternal, {
       signalId: args.signalId,
     })) as any;
@@ -434,6 +447,9 @@ export const processSignal = internalAction({
           triggeredBy: "threshold",
         });
       }
+    }
+    } finally {
+      await advance();
     }
   },
 });

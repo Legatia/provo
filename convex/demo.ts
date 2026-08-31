@@ -224,7 +224,7 @@ export const seedPublicSignals = mutation({
     const { key } = pack(company);
     const ramp = rampFor(key);
 
-    let scheduled = 0;
+    const ids: any[] = [];
     for (let i = 0; i < ramp.length; i++) {
       const [content, daysBack, hoursAgo, source, urgency, segment] = ramp[i];
       const signalId = await ctx.db.insert("signals", {
@@ -241,11 +241,17 @@ export const seedPublicSignals = mutation({
         affectedSegment: segment,
         processedAt: now(),
       });
-      // stagger so the dashboard shows them arriving live
-      await ctx.scheduler.runAfter(i * 0.8, internal.agent.processSignal, { signalId });
-      scheduled++;
+      ids.push(signalId);
     }
-    return { scheduled };
+    // CHAINED, not staggered: process one at a time (each schedules the next)
+    // so clustering sees every prior signal — one story, one finding
+    if (ids.length > 0) {
+      await ctx.scheduler.runAfter(0, internal.agent.processSignal, {
+        signalId: ids[0],
+        queue: ids.slice(1),
+      });
+    }
+    return { scheduled: ids.length };
   },
 });
 

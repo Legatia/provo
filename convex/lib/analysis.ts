@@ -127,11 +127,16 @@ export async function matchSignalToIssue(args: {
   const out = await chatJSON<MatchResult>({
     model: MODEL_FAST,
     system:
-      "You are the memory of a customer intelligence agent. Decide whether a new customer signal " +
-      "belongs to one of the currently-open issues, matches a RESOLVED historical issue " +
+      "You are the memory of an intelligence desk. Decide whether a new public signal " +
+      "belongs to one of the currently-open findings, matches a RESOLVED historical finding " +
       "(important: it may be a recurrence — choose 'historical' and reference it), or is new. " +
-      "Match on the underlying customer problem, not surface wording. " +
-      "If nothing matches, use action='new' and issueId=''.",
+      "Match on the underlying problem, not surface wording. " +
+      "Be CONSERVATIVE about creating new findings: if ANY open finding plausibly covers this " +
+      "signal's problem (same symptom, same flow, same user pain — even if worded differently " +
+      "or on a slightly different surface), choose 'existing' with that issueId. Near-duplicate " +
+      "findings fragment the record; when in doubt, cluster. " +
+      "Only choose 'new' for a genuinely different problem. " +
+      "If nothing matches at all, use action='new' and issueId=''.",
     user: JSON.stringify(
       {
         signal: args.signal,

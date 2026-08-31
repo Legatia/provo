@@ -130,51 +130,59 @@ export const recentInvestigationInternal = internalQuery({
 export const getLiveStateInternal = internalQuery({
   args: { focusIssue: v.optional(v.id("issues")) },
   handler: async (ctx, args) => {
-    const company = await ctx.db.query("companies").first();
-    if (!company) return "No company configured.";
-    const issues = await ctx.db
-      .query("issues")
-      .withIndex("by_company", (q) => q.eq("company", company._id))
-      .collect();
-    const active = issues.filter((i) => i.status !== "resolved");
-    const resolved = issues.filter((i) => i.status === "resolved");
+    // desk-wide: the chat answers across EVERY monitored entity
+    const companies = await ctx.db.query("companies").collect();
+    if (companies.length === 0) return "No monitored entities configured.";
+    const lines: string[] = [
+      `Desk watching ${companies.length} entities: ${companies
+        .map((c) => `${c.name} (${c.product})`)
+        .join(", ")}`,
+    ];
 
-    const lines: string[] = [`Company: ${company.name} — product: ${company.product}`];
-
-    lines.push("ACTIVE ISSUES:");
-    for (const i of active) {
-      lines.push(
-        `\n- ${i.title} [${i.status}/${i.severity}] — ${i.description}\n` +
-          `  mentions: ${i.mentionsThisWeek} this week vs ${i.mentionsPrevWeek} last week` +
-          (i.growthMultiplier ? ` (x${i.growthMultiplier})` : "") +
-          `\n  affected: ${i.affectedSegment ?? "unknown"}, confidence: ${i.confidence}%` +
-          `\n  recommended: ${i.recommendedAction ?? "n/a"}` +
-          (i.historicalNote ? `\n  history: ${i.historicalNote}` : "") +
-          (i.reasoningSummary ? `\n  agent reasoning: ${i.reasoningSummary}` : "")
-      );
-      const evidence = await ctx.db
-        .query("evidence")
-        .withIndex("by_issue", (q) => q.eq("issue", i._id))
+    for (const company of companies) {
+      const issues = await ctx.db
+        .query("issues")
+        .withIndex("by_company", (q) => q.eq("company", company._id))
         .collect();
-      for (const e of evidence.slice(0, 8)) {
-        lines.push(
-          `  evidence [${e.kind}/${e.source}] (${fmtDate(e.occurredAt)}, relevance ${e.relevance}): "${e.excerpt.slice(0, 200)}"${e.url ? ` ${e.url}` : ""}`
-        );
-      }
-    }
+      const active = issues.filter((i) => i.status !== "resolved");
+      const resolved = issues.filter((i) => i.status === "resolved");
+      if (active.length === 0 && resolved.length === 0) continue;
 
-    if (resolved.length > 0) {
-      lines.push("\nRESOLVED HISTORICAL ISSUES:");
-      for (const i of resolved) {
+      lines.push(`\nENTITY: ${company.name} — product: ${company.product}`);
+      lines.push("ACTIVE FINDINGS:");
+      for (const i of active) {
         lines.push(
-          `- ${i.title} (first ${fmtDate(i.firstDetectedAt)}${i.resolvedAt ? `, resolved ${fmtDate(i.resolvedAt)}` : ""}): ${i.description}${i.resolutionNote ? ` — ${i.resolutionNote}` : ""}`
+          `\n- ${i.title} [${i.status}/${i.severity}] — ${i.description}\n` +
+            `  mentions: ${i.mentionsThisWeek} this week vs ${i.mentionsPrevWeek} last week` +
+            (i.growthMultiplier ? ` (x${i.growthMultiplier})` : "") +
+            `\n  affected: ${i.affectedSegment ?? "unknown"}, confidence: ${i.confidence}%` +
+            `\n  recommended: ${i.recommendedAction ?? "n/a"}` +
+            (i.historicalNote ? `\n  history: ${i.historicalNote}` : "") +
+            (i.reasoningSummary ? `\n  desk reasoning: ${i.reasoningSummary}` : "")
         );
+        const evidence = await ctx.db
+          .query("evidence")
+          .withIndex("by_issue", (q) => q.eq("issue", i._id))
+          .collect();
+        for (const e of evidence.slice(0, 8)) {
+          lines.push(
+            `  evidence [${e.kind}/${e.source}] (${fmtDate(e.occurredAt)}, relevance ${e.relevance}): "${e.excerpt.slice(0, 200)}"${e.url ? ` ${e.url}` : ""}`
+          );
+        }
+      }
+      if (resolved.length > 0) {
+        lines.push("\nRESOLVED HISTORICAL FINDINGS:");
+        for (const i of resolved) {
+          lines.push(
+            `- ${i.title} (first ${fmtDate(i.firstDetectedAt)}${i.resolvedAt ? `, resolved ${fmtDate(i.resolvedAt)}` : ""}): ${i.description}${i.resolutionNote ? ` — ${i.resolutionNote}` : ""}`
+          );
+        }
       }
     }
 
     if (args.focusIssue) {
-      const focus = issues.find((i) => i._id === args.focusIssue);
-      if (focus) lines.push(`\nFOCUS ISSUE: ${focus.title}`);
+      const focus = await ctx.db.get(args.focusIssue);
+      if (focus) lines.push(`\nFOCUS FINDING: ${focus.title}`);
     }
 
     return lines.join("\n");
@@ -196,12 +204,8 @@ export const listChatInternal = internalQuery({
 export const listActiveIssuesInternal = internalQuery({
   args: {},
   handler: async (ctx) => {
-    const company = await ctx.db.query("companies").first();
-    if (!company) return [];
-    const issues = await ctx.db
-      .query("issues")
-      .withIndex("by_company", (q) => q.eq("company", company._id))
-      .collect();
+    // desk-wide: every active finding across every monitored entity
+    const issues = await ctx.db.query("issues").collect();
     return issues.filter((i) => i.status !== "resolved").map((i) => ({ ...i, _id: i._id }));
   },
 });
