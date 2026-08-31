@@ -16,16 +16,16 @@ import { RingMeter, BarChart } from "../components/charts";
 import { Link, useParams } from "react-router-dom";
 
 const KIND_META: Record<string, { icon: string; label: string; tint: string }> = {
-  signal: { icon: "🌐", label: "public discussion", tint: "text-zinc-400" },
-  email: { icon: "📧", label: "inbound message", tint: "text-emerald-300" },
-  web: { icon: "🔍", label: "web evidence", tint: "text-indigo-300" },
-  historical: { icon: "🕘", label: "historical", tint: "text-violet-300" },
+  signal: { icon: "🌐", label: "public discussion", tint: "text-paper-dim" },
+  email: { icon: "📧", label: "inbound message", tint: "text-verdigris" },
+  web: { icon: "🔍", label: "web evidence", tint: "text-brass-bright" },
+  historical: { icon: "🕘", label: "historical", tint: "text-verdigris" },
 };
 
 function Stat({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1.5 px-4 py-3.5">
-      <span className="text-[9px] font-semibold uppercase tracking-[0.16em] text-zinc-600">
+      <span className="text-[9px] font-semibold uppercase tracking-[0.16em] text-paper-dim/70">
         {label}
       </span>
       {children}
@@ -52,12 +52,12 @@ export default function IssueDetail() {
   }, [detail]);
 
   if (detail === undefined)
-    return <div className="skeleton h-96 rounded-2xl" />;
+    return <div className="skeleton h-96 rounded-xl" />;
   if (detail === null)
     return (
-      <Card className="p-10 text-center text-sm text-zinc-500">
+      <Card className="p-10 text-center text-sm text-paper-dim">
         Issue not found.{" "}
-        <Link to="/issues" className="text-indigo-300 hover:text-indigo-200">
+        <Link to="/issues" className="text-brass-bright hover:text-brass-bright">
           Back to issues →
         </Link>
       </Card>
@@ -78,7 +78,7 @@ export default function IssueDetail() {
       {/* header */}
       <div className="flex items-start justify-between gap-5">
         <div className="min-w-0">
-          <Link to="/issues" className="text-[11px] text-zinc-500 transition hover:text-zinc-300">
+          <Link to="/issues" className="text-[11px] text-paper-dim transition hover:text-paper/90">
             ← issues
           </Link>
           <div className="mt-1.5 flex flex-wrap items-center gap-2.5">
@@ -86,11 +86,11 @@ export default function IssueDetail() {
               {issue.title}
             </h2>
             <StatusBadge status={issue.status} />
-            <span className="rounded-md border border-white/[0.08] px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wider text-zinc-400">
+            <span className="rounded-md border border-rule px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wider text-paper-dim">
               {issue.severity}
             </span>
           </div>
-          <p className="mt-2 max-w-2xl text-[13px] leading-relaxed text-zinc-400">
+          <p className="mt-2 max-w-2xl text-[13px] leading-relaxed text-paper-dim">
             {issue.description}
           </p>
         </div>
@@ -114,38 +114,38 @@ export default function IssueDetail() {
       <Card className="grid grid-cols-2 divide-white/[0.05] sm:grid-cols-4 sm:divide-x">
         <Stat label="Mentions">
           <div className="flex items-baseline gap-2">
-            <span className="font-mono text-2xl font-semibold text-zinc-100">
+            <span className="font-mono text-2xl font-semibold text-paper">
               {issue.mentionsThisWeek}
             </span>
-            <span className="font-mono text-xs text-zinc-500">/ {issue.mentionsPrevWeek} prev wk</span>
+            <span className="font-mono text-xs text-paper-dim">/ {issue.mentionsPrevWeek} prev wk</span>
           </div>
           <TrendBadge growth={issue.growthMultiplier} />
         </Stat>
         <Stat label="Confidence">
           <div className="flex items-center gap-3">
             <RingMeter value={issue.confidence} size={44} label="%" />
-            <span className="text-[11px] leading-snug text-zinc-500">
+            <span className="text-[11px] leading-snug text-paper-dim">
               {evidence.length} evidence items
             </span>
           </div>
         </Stat>
         <Stat label="Priority">
-          <div className="font-mono text-2xl font-semibold text-zinc-100">
+          <div className="font-mono text-2xl font-semibold text-paper">
             {Math.round(issue.priorityScore)}
-            <span className="text-sm text-zinc-600">/100</span>
+            <span className="text-sm text-paper-dim/70">/100</span>
           </div>
-          <div className="flex h-1 w-24 overflow-hidden rounded-full bg-white/[0.06]">
+          <div className="flex h-1 w-24 overflow-hidden rounded-full bg-paper/[0.04]">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-400 transition-all duration-700"
+              className="h-full rounded-full bg-gradient-to-r from-brass to-verdigris transition-all duration-700"
               style={{ width: `${issue.priorityScore}%` }}
             />
           </div>
         </Stat>
         <Stat label="Affected">
-          <div className="text-[13px] font-medium text-zinc-200">
+          <div className="text-[13px] font-medium text-paper">
             {issue.affectedSegment ?? "unknown"}
           </div>
-          <span className="font-mono text-[10px] text-zinc-600">
+          <span className="font-mono text-[10px] text-paper-dim/70">
             first {fmtDate(issue.firstDetectedAt)} · last {fmtDate(issue.lastDetectedAt)}
             {issue.resolvedAt ? ` · resolved ${fmtDate(issue.resolvedAt)}` : ""}
           </span>
@@ -156,8 +156,8 @@ export default function IssueDetail() {
       {(issue.historicalNote || issue.reasoningSummary || issue.recommendedAction) && (
         <div className="grid gap-3 lg:grid-cols-3">
           {issue.historicalNote && (
-            <Card className="border-violet-500/20 bg-violet-500/[0.05] p-4">
-              <div className="flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-[0.16em] text-violet-300">
+            <Card className="border-verdigris/20 bg-verdigris/[0.05] p-4">
+              <div className="flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-[0.16em] text-verdigris">
                 <span>🧠</span> Historical context
               </div>
               <p className="mt-2.5 text-[12.5px] leading-relaxed text-violet-200/90">
@@ -167,17 +167,17 @@ export default function IssueDetail() {
           )}
           {issue.reasoningSummary && (
             <Card className="p-4">
-              <div className="flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-[0.16em] text-zinc-400">
+              <div className="flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-[0.16em] text-paper-dim">
                 <span>◍</span> Agent reasoning
               </div>
-              <p className="mt-2.5 text-[12.5px] leading-relaxed text-zinc-300">
+              <p className="mt-2.5 text-[12.5px] leading-relaxed text-paper/90">
                 {issue.reasoningSummary}
               </p>
             </Card>
           )}
           {issue.recommendedAction && (
-            <Card className="border-emerald-500/20 bg-emerald-500/[0.05] p-4">
-              <div className="flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-[0.16em] text-emerald-300">
+            <Card className="border-verdigris/20 bg-verdigris/[0.05] p-4">
+              <div className="flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-[0.16em] text-verdigris">
                 <span>➜</span> Recommended
               </div>
               <p className="mt-2.5 text-[12.5px] leading-relaxed text-emerald-200/90">
@@ -194,7 +194,7 @@ export default function IssueDetail() {
           <div>
             <SectionTitle
               right={
-                <span className="font-mono text-[10px] text-zinc-600">
+                <span className="font-mono text-[10px] text-paper-dim/70">
                   {evidence.length} items · {webEvidence.length} web
                 </span>
               }
@@ -203,7 +203,7 @@ export default function IssueDetail() {
             </SectionTitle>
             <Card className="relative p-0">
               {evidence.length === 0 && (
-                <div className="px-6 py-10 text-center text-xs text-zinc-500">
+                <div className="px-6 py-10 text-center text-xs text-paper-dim">
                   No evidence collected yet.
                 </div>
               )}
@@ -214,24 +214,24 @@ export default function IssueDetail() {
                 {evidence.map((e: any) => {
                   const meta = KIND_META[e.kind] ?? KIND_META.signal;
                   return (
-                    <div key={e._id} className="animate-fade-up relative flex gap-3.5 px-4 py-3.5 transition hover:bg-white/[0.02]">
-                      <div className="relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/[0.09] bg-zinc-900 text-[11px]">
+                    <div key={e._id} className="animate-fade-up relative flex gap-3.5 px-4 py-3.5 transition hover:bg-paper/[0.015]">
+                      <div className="relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-rule bg-ink-raised text-[11px]">
                         {meta.icon}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px]">
                           <span className={`font-medium ${meta.tint}`}>{meta.label}</span>
-                          {e.source !== e.kind && <span className="text-zinc-600">{e.source}</span>}
+                          {e.source !== e.kind && <span className="text-paper-dim/70">{e.source}</span>}
                           <span className="text-zinc-700">·</span>
-                          <span className="font-mono text-zinc-600">{fmtDate(e.occurredAt)}</span>
-                          <span className="ml-auto inline-flex items-center gap-1 font-mono text-zinc-600">
+                          <span className="font-mono text-paper-dim/70">{fmtDate(e.occurredAt)}</span>
+                          <span className="ml-auto inline-flex items-center gap-1 font-mono text-paper-dim/70">
                             rel
-                            <span className="rounded bg-white/[0.05] px-1 py-px text-zinc-400">
+                            <span className="rounded bg-paper/[0.03] px-1 py-px text-paper-dim">
                               {e.relevance}
                             </span>
                           </span>
                         </div>
-                        <blockquote className="mt-1.5 border-l-2 border-white/[0.09] pl-2.5 text-[12.5px] leading-relaxed text-zinc-300">
+                        <blockquote className="mt-1.5 border-l-2 border-rule pl-2.5 text-[12.5px] leading-relaxed text-paper/90">
                           {e.excerpt}
                         </blockquote>
                         {e.url && (
@@ -239,7 +239,7 @@ export default function IssueDetail() {
                             href={e.url}
                             target="_blank"
                             rel="noreferrer"
-                            className="mt-1 inline-flex max-w-full items-center gap-1.5 truncate font-mono text-[10.5px] text-indigo-300/80 transition hover:text-indigo-200"
+                            className="mt-1 inline-flex max-w-full items-center gap-1.5 truncate font-mono text-[10.5px] text-brass-bright/80 transition hover:text-brass-bright"
                           >
                             <Favicon url={e.url} />
                             <span className="truncate">{e.url}</span>
@@ -255,7 +255,7 @@ export default function IssueDetail() {
 
           {/* raw signals */}
           <div>
-            <SectionTitle right={<span className="font-mono text-[10px] text-zinc-600">{signals.length}</span>}>
+            <SectionTitle right={<span className="font-mono text-[10px] text-paper-dim/70">{signals.length}</span>}>
               Raw signals
             </SectionTitle>
             <Card className="max-h-72 divide-y divide-white/[0.05] overflow-y-auto">
@@ -264,20 +264,20 @@ export default function IssueDetail() {
                 .map((s: any) => (
                   <div key={s._id} className="group px-4 py-2.5">
                     <div className="flex items-center justify-between text-[10px]">
-                      <span className="flex items-center gap-1.5 text-zinc-500">
+                      <span className="flex items-center gap-1.5 text-paper-dim">
                         <span>{s.source === "email" ? "📧" : "🌐"}</span>
                         {s.source}
-                        {s.author ? <span className="text-zinc-600">· {s.author}</span> : null}
+                        {s.author ? <span className="text-paper-dim/70">· {s.author}</span> : null}
                       </span>
-                      <span className="font-mono text-zinc-600">{fmtDate(s.occurredAt)}</span>
+                      <span className="font-mono text-paper-dim/70">{fmtDate(s.occurredAt)}</span>
                     </div>
-                    <p className="mt-1 line-clamp-2 text-[11.5px] leading-relaxed text-zinc-400 transition group-hover:text-zinc-300">
+                    <p className="mt-1 line-clamp-2 text-[11.5px] leading-relaxed text-paper-dim transition group-hover:text-paper/90">
                       {s.content}
                     </p>
                   </div>
                 ))}
               {signals.length === 0 && (
-                <div className="px-4 py-6 text-center text-xs text-zinc-500">none</div>
+                <div className="px-4 py-6 text-center text-xs text-paper-dim">none</div>
               )}
             </Card>
           </div>
@@ -287,22 +287,22 @@ export default function IssueDetail() {
         <div className="space-y-5 lg:col-span-2">
           {/* mentions per day */}
           <div>
-            <SectionTitle right={<span className="font-mono text-[10px] text-zinc-600">14 days</span>}>
+            <SectionTitle right={<span className="font-mono text-[10px] text-paper-dim/70">14 days</span>}>
               Mentions / day
             </SectionTitle>
             <Card className="p-4">
-              <BarChart data={daily ?? []} labels={dayLabels} height={60} color="#34d399" />
+              <BarChart data={daily ?? []} labels={dayLabels} height={60} color="#58B98C" />
             </Card>
           </div>
 
           {/* investigations */}
           <div>
-            <SectionTitle right={<span className="font-mono text-[10px] text-zinc-600">{investigations.length}</span>}>
+            <SectionTitle right={<span className="font-mono text-[10px] text-paper-dim/70">{investigations.length}</span>}>
               Investigations
             </SectionTitle>
             <Card className="divide-y divide-white/[0.05]">
               {investigations.length === 0 && (
-                <div className="px-4 py-6 text-center text-xs text-zinc-500">
+                <div className="px-4 py-6 text-center text-xs text-paper-dim">
                   None yet — trigger one above.
                 </div>
               )}
@@ -310,12 +310,12 @@ export default function IssueDetail() {
                 <div key={inv._id} className={`animate-fade-up p-4 ${inv.status === "running" ? "running-sweep" : ""}`}>
                   <div className="flex items-center justify-between gap-2">
                     <StatusBadge status={inv.status === "pending" ? "running" : inv.status} />
-                    <span className="font-mono text-[9px] text-zinc-600">
+                    <span className="font-mono text-[9px] text-paper-dim/70">
                       {fmtDateTime(inv.startedAt)} · {inv.triggeredBy}
                     </span>
                   </div>
                   {inv.question && (
-                    <p className="mt-2 text-[12px] italic leading-snug text-zinc-300">“{inv.question}”</p>
+                    <p className="mt-2 text-[12px] italic leading-snug text-paper/90">“{inv.question}”</p>
                   )}
                   {inv.plan.length > 0 && (
                     <div className="mt-2.5 space-y-1">
@@ -327,15 +327,15 @@ export default function IssueDetail() {
                             <span
                               className={
                                 done
-                                  ? "text-emerald-400"
+                                  ? "text-verdigris"
                                   : current
-                                    ? "animate-pulse-dot text-indigo-300"
+                                    ? "animate-pulse-dot text-brass-bright"
                                     : "text-zinc-700"
                               }
                             >
                               {done ? "●" : "○"}
                             </span>
-                            <span className={done ? "text-zinc-400" : current ? "text-indigo-200" : "text-zinc-600"}>
+                            <span className={done ? "text-paper-dim" : current ? "text-brass-bright" : "text-paper-dim/70"}>
                               {step}
                             </span>
                           </div>
@@ -344,7 +344,7 @@ export default function IssueDetail() {
                     </div>
                   )}
                   {inv.findings && (
-                    <p className="mt-3 whitespace-pre-line rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-[11px] leading-relaxed text-zinc-400">
+                    <p className="mt-3 whitespace-pre-line rounded-xl border border-rule bg-paper/[0.015] p-3 text-[11px] leading-relaxed text-paper-dim">
                       {inv.findings}
                     </p>
                   )}
@@ -361,24 +361,24 @@ export default function IssueDetail() {
                 {reports.map((r: any) => (
                   <div key={r._id} className="animate-fade-up p-4">
                     <div className="flex items-start justify-between gap-2">
-                      <span className="text-[12.5px] font-medium leading-snug text-zinc-200">
+                      <span className="text-[12.5px] font-medium leading-snug text-paper">
                         {r.subject}
                       </span>
-                      <span className="shrink-0 font-mono text-[9px] text-zinc-600">
+                      <span className="shrink-0 font-mono text-[9px] text-paper-dim/70">
                         {timeAgo(r.sentAt)} ago
                       </span>
                     </div>
-                    <div className="mt-1 flex items-center gap-2 font-mono text-[10px] text-zinc-500">
+                    <div className="mt-1 flex items-center gap-2 font-mono text-[10px] text-paper-dim">
                       <span>→ {r.sentTo}</span>
-                      <span className="rounded bg-white/[0.05] px-1.5 py-px uppercase tracking-wider text-zinc-400">
+                      <span className="rounded bg-paper/[0.03] px-1.5 py-px uppercase tracking-wider text-paper-dim">
                         {r.kind}
                       </span>
                     </div>
                     <details className="group mt-2">
-                      <summary className="cursor-pointer text-[11px] text-zinc-500 transition hover:text-zinc-300">
+                      <summary className="cursor-pointer text-[11px] text-paper-dim transition hover:text-paper/90">
                         show report
                       </summary>
-                      <pre className="mt-2 max-h-72 overflow-y-auto whitespace-pre-wrap rounded-xl border border-white/[0.06] bg-black/30 p-3 font-mono text-[10.5px] leading-relaxed text-zinc-400">
+                      <pre className="mt-2 max-h-72 overflow-y-auto whitespace-pre-wrap rounded-xl border border-rule bg-black/30 p-3 font-mono text-[10.5px] leading-relaxed text-paper-dim">
                         {r.bodyText}
                       </pre>
                     </details>

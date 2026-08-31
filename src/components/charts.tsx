@@ -18,7 +18,7 @@ const path = (data: number[], w: number, h: number, pad = 2): string => {
 export function Sparkline({
   data,
   className = "",
-  stroke = "#818cf8",
+  stroke = "#C9A24B",
   width = 120,
   height = 32,
 }: {
@@ -77,7 +77,7 @@ export function Sparkline({
 export function BarChart({
   data,
   className = "",
-  color = "#818cf8",
+  color = "#C9A24B",
   height = 72,
   labels,
 }: {
@@ -103,7 +103,7 @@ export function BarChart({
           }}
           title={labels ? `${labels[i]}: ${v} mention${v === 1 ? "" : "s"}` : `${v}`}
         >
-          <div className="pointer-events-none absolute -top-7 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-md border border-white/10 bg-zinc-900 px-1.5 py-0.5 font-mono text-[10px] text-zinc-300 opacity-0 shadow-lg transition group-hover:opacity-100">
+          <div className="pointer-events-none absolute -top-7 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-md border border-rule-strong bg-ink-raised px-1.5 py-0.5 font-mono text-[10px] text-paper/90 opacity-0 shadow-lg transition group-hover:opacity-100">
             {labels ? `${labels[i]}` : ""} {v}
           </div>
         </div>
@@ -128,7 +128,7 @@ export function RingMeter({
   const c = 2 * Math.PI * r;
   const filled = (value / 100) * c;
   const color =
-    value >= 75 ? "#34d399" : value >= 50 ? "#fbbf24" : "#a1a1aa";
+    value >= 75 ? "#58B98C" : value >= 50 ? "#D9A62E" : "#a1a1aa";
   return (
     <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
@@ -147,7 +147,7 @@ export function RingMeter({
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="font-mono text-[11px] font-semibold leading-none">{value}</span>
-        {label && <span className="mt-0.5 text-[7px] uppercase tracking-wider text-zinc-500">{label}</span>}
+        {label && <span className="mt-0.5 text-[7px] uppercase tracking-wider text-paper-dim">{label}</span>}
       </div>
     </div>
   );
@@ -167,7 +167,7 @@ export function MixBar({
   );
   return (
     <div className={className}>
-      <div className="flex h-1.5 overflow-hidden rounded-full bg-white/5">
+      <div className="flex h-1.5 overflow-hidden rounded-full bg-paper/[0.03]">
         {parts
           .filter((p) => p.count > 0)
           .map((p) => (
@@ -183,10 +183,10 @@ export function MixBar({
         {parts
           .filter((p) => p.count > 0)
           .map((p) => (
-            <span key={p.label} className="flex items-center gap-1 text-[10px] text-zinc-500">
+            <span key={p.label} className="flex items-center gap-1 text-[10px] text-paper-dim">
               <span className="h-1.5 w-1.5 rounded-full" style={{ background: p.color }} />
               {p.label}
-              <span className="font-mono text-zinc-400">{p.count}</span>
+              <span className="font-mono text-paper-dim">{p.count}</span>
             </span>
           ))}
       </div>

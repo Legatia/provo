@@ -14,8 +14,8 @@ export function Card({
   return (
     <div
       className={clsx(
-        "rounded-2xl border border-white/[0.07] bg-white/[0.025] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] backdrop-blur-sm",
-        hover && "transition-all duration-200 hover:border-white/[0.14] hover:bg-white/[0.04]",
+        "rounded-xl border border-rule bg-paper/[0.015] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] backdrop-blur-sm",
+        hover && "transition-all duration-200 hover:border-rule-strong hover:bg-paper/[0.025]",
         className
       )}
     >
@@ -33,7 +33,7 @@ export function SectionTitle({
 }) {
   return (
     <div className="mb-3 flex items-center justify-between">
-      <h2 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
+      <h2 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-paper-dim">
         {children}
       </h2>
       {right}
@@ -42,35 +42,35 @@ export function SectionTitle({
 }
 
 const STATUS_STYLES: Record<string, string> = {
-  critical: "bg-red-500/12 text-red-300 border-red-500/25",
-  confirmed: "bg-orange-500/12 text-orange-300 border-orange-500/25",
-  emerging: "bg-amber-500/12 text-amber-300 border-amber-500/25",
-  watching: "bg-sky-500/12 text-sky-300 border-sky-500/25",
-  resolved: "bg-emerald-500/12 text-emerald-300 border-emerald-500/25",
+  critical: "bg-oxblood/12 text-oxblood border-oxblood/25",
+  confirmed: "bg-amber-flag/12 text-amber-flag border-amber-flag/25",
+  emerging: "bg-amber-flag/12 text-amber-flag border-amber-flag/25",
+  watching: "bg-brass/12 text-brass-bright border-brass/25",
+  resolved: "bg-verdigris/12 text-verdigris border-verdigris/25",
   running: "bg-brass/12 text-brass-bright border-brass/25",
-  complete: "bg-emerald-500/12 text-emerald-300 border-emerald-500/25",
-  pending: "bg-zinc-500/12 text-zinc-400 border-zinc-500/25",
-  failed: "bg-red-500/12 text-red-300 border-red-500/25",
+  complete: "bg-verdigris/12 text-verdigris border-verdigris/25",
+  pending: "bg-zinc-500/12 text-paper-dim border-zinc-500/25",
+  failed: "bg-oxblood/12 text-oxblood border-oxblood/25",
 };
 
 const STATUS_DOTS: Record<string, string> = {
-  critical: "bg-red-400",
-  confirmed: "bg-orange-400",
-  emerging: "bg-amber-400",
-  watching: "bg-sky-400",
-  resolved: "bg-emerald-400",
+  critical: "bg-oxblood",
+  confirmed: "bg-amber-flag",
+  emerging: "bg-amber-flag",
+  watching: "bg-brass",
+  resolved: "bg-verdigris",
   running: "bg-brass",
-  complete: "bg-emerald-400",
+  complete: "bg-verdigris",
   pending: "bg-zinc-400",
-  failed: "bg-red-400",
+  failed: "bg-oxblood",
 };
 
 const STATUS_TEXT: Record<string, string> = {
-  critical: "text-red-300",
-  confirmed: "text-orange-300",
-  emerging: "text-amber-300",
-  watching: "text-sky-300",
-  resolved: "text-emerald-300",
+  critical: "text-oxblood",
+  confirmed: "text-amber-flag",
+  emerging: "text-amber-flag",
+  watching: "text-brass-bright",
+  resolved: "text-verdigris",
   running: "text-brass-bright",
 };
 
@@ -90,21 +90,21 @@ export function StatusBadge({ status }: { status: string }) {
 
 /** status text color for large titles */
 export function statusText(status: string): string {
-  return STATUS_TEXT[status] ?? "text-zinc-300";
+  return STATUS_TEXT[status] ?? "text-paper/90";
 }
 
 const TYPE_CONFIG: Record<string, { icon: string; ring: string }> = {
-  observe: { icon: "👁", ring: "ring-sky-500/20 bg-sky-500/10" },
-  detect: { icon: "📡", ring: "ring-amber-500/20 bg-amber-500/10" },
+  observe: { icon: "👁", ring: "ring-brass/20 bg-brass/10" },
+  detect: { icon: "📡", ring: "ring-amber-flag/20 bg-amber-flag/10" },
   investigate: { icon: "🔍", ring: "ring-brass/20 bg-brass/10" },
   remember: { icon: "🧠", ring: "ring-verdigris/20 bg-verdigris/10" },
-  report: { icon: "✉️", ring: "ring-emerald-500/20 bg-emerald-500/10" },
-  reply: { icon: "💬", ring: "ring-teal-500/20 bg-teal-500/10" },
-  chat: { icon: "💬", ring: "ring-teal-500/20 bg-teal-500/10" },
+  report: { icon: "✉️", ring: "ring-verdigris/20 bg-verdigris/10" },
+  reply: { icon: "💬", ring: "ring-verdigris/20 bg-verdigris/10" },
+  chat: { icon: "💬", ring: "ring-verdigris/20 bg-verdigris/10" },
 };
 
 export function TypeIcon({ type, running }: { type: string; running?: boolean }) {
-  const cfg = TYPE_CONFIG[type] ?? { icon: "•", ring: "ring-white/10 bg-white/5" };
+  const cfg = TYPE_CONFIG[type] ?? { icon: "•", ring: "ring-white/10 bg-paper/[0.03]" };
   return (
     <span
       className={clsx(
@@ -120,7 +120,7 @@ export function TypeIcon({ type, running }: { type: string; running?: boolean })
 
 export function TrendBadge({ growth, big = false }: { growth?: number | null; big?: boolean }) {
   if (growth == null)
-    return <span className={clsx("font-mono text-zinc-600", big ? "text-sm" : "text-[11px]")}>—</span>;
+    return <span className={clsx("font-mono text-paper-dim/70", big ? "text-sm" : "text-[11px]")}>—</span>;
   const up = growth > 1;
   return (
     <span
@@ -128,8 +128,8 @@ export function TrendBadge({ growth, big = false }: { growth?: number | null; bi
         "inline-flex items-center gap-1 rounded-full border font-mono font-semibold",
         big ? "px-2 py-0.5 text-xs" : "px-1.5 text-[10px]",
         up
-          ? "border-red-500/25 bg-red-500/10 text-red-300"
-          : "border-emerald-500/25 bg-emerald-500/10 text-emerald-300"
+          ? "border-oxblood/25 bg-oxblood/10 text-oxblood"
+          : "border-verdigris/25 bg-verdigris/10 text-verdigris"
       )}
     >
       <svg width="9" height="9" viewBox="0 0 10 10" className={up ? "" : "rotate-180"}>
@@ -143,8 +143,8 @@ export function TrendBadge({ growth, big = false }: { growth?: number | null; bi
 export function LiveDot({ className = "" }: { className?: string }) {
   return (
     <span className={clsx("relative inline-flex h-2 w-2", className)}>
-      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-      <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.7)]" />
+      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-verdigris opacity-60" />
+      <span className="relative inline-flex h-2 w-2 rounded-full bg-verdigris shadow-[0_0_6px_rgba(88,185,140,0.7)]" />
     </span>
   );
 }
@@ -177,11 +177,11 @@ export function EmptyState({
 }) {
   return (
     <div className="flex flex-col items-center justify-center px-6 py-12 text-center">
-      <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/[0.07] bg-white/[0.03] text-xl">
+      <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-rule bg-paper/[0.02] text-xl">
         {icon}
       </div>
-      <p className="mt-3 text-sm font-medium text-zinc-300">{title}</p>
-      {hint && <p className="mt-1 max-w-xs text-xs leading-relaxed text-zinc-500">{hint}</p>}
+      <p className="mt-3 text-sm font-medium text-paper/90">{title}</p>
+      {hint && <p className="mt-1 max-w-xs text-xs leading-relaxed text-paper-dim">{hint}</p>}
     </div>
   );
 }
@@ -211,12 +211,12 @@ export function Button({
       onClick={onClick}
       disabled={disabled}
       className={clsx(
-        "inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-150 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40",
+        "inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 font-mono text-[11.5px] font-medium uppercase tracking-[0.1em] transition-all duration-150 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40",
         variant === "primary" &&
-          "bg-indigo-500/90 text-white shadow-[0_0_20px_rgba(99,102,241,0.25)] hover:bg-indigo-400",
+          "border border-brass/60 bg-brass/20 text-brass-bright shadow-[0_0_20px_rgba(201,162,75,0.18)] hover:bg-brass/30",
         variant === "default" &&
-          "border border-white/10 bg-white/[0.04] text-zinc-200 hover:border-white/20 hover:bg-white/[0.08]",
-        variant === "ghost" && "text-zinc-400 hover:bg-white/[0.05] hover:text-zinc-200",
+          "border border-rule-strong bg-paper/[0.02] text-paper-dim hover:border-paper/25 hover:bg-paper/[0.04] hover:text-paper",
+        variant === "ghost" && "text-paper-dim hover:bg-paper/[0.03] hover:text-paper",
         className
       )}
     >

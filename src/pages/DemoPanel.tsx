@@ -59,7 +59,7 @@ function LiveResearchCard() {
       <SectionTitle
         right={
           status.running ? (
-            <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-indigo-300">
+            <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-brass-bright">
               <LiveDot /> researching
             </span>
           ) : undefined
@@ -69,7 +69,7 @@ function LiveResearchCard() {
       </SectionTitle>
 
       <div className="flex items-center justify-between gap-3">
-        <p className="max-w-[200px] text-[11px] leading-relaxed text-zinc-500">
+        <p className="max-w-[200px] text-[11px] leading-relaxed text-paper-dim">
           {status.running
             ? "Sweeping sources + searching the live web on the watched product."
             : "Run ~2 minutes of visible web research on the watched product."}
@@ -86,7 +86,7 @@ function LiveResearchCard() {
               }
             }}
             disabled={busy}
-            className="shrink-0 border-red-500/30 bg-red-500/10 text-red-300 hover:border-red-500/50 hover:bg-red-500/20"
+            className="shrink-0 border-oxblood/30 bg-oxblood/10 text-oxblood hover:border-oxblood/50 hover:bg-oxblood/20"
           >
             ■ Stop
           </Button>
@@ -111,13 +111,13 @@ function LiveResearchCard() {
 
       {status.running && (
         <div className="mt-3">
-          <div className="flex items-center justify-between font-mono text-[10px] text-zinc-500">
+          <div className="flex items-center justify-between font-mono text-[10px] text-paper-dim">
             <span>
               {mm}:{ss.toString().padStart(2, "0")} remaining
             </span>
             <span>sweep {status.iterations}</span>
           </div>
-          <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
+          <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-paper/[0.04]">
             <div
               className="h-full rounded-full bg-gradient-to-r from-brass-deep to-brass-bright transition-all duration-1000"
               style={{ width: `${progress}%` }}
@@ -126,21 +126,21 @@ function LiveResearchCard() {
         </div>
       )}
 
-      <div className="mt-3 grid grid-cols-3 gap-2 border-t border-white/[0.06] pt-3">
+      <div className="mt-3 grid grid-cols-3 gap-2 border-t border-rule pt-3">
         {[
           ["sweeps", status.iterations],
           ["items seen", status.itemsSeen],
           ["new signals", status.signalsFound],
         ].map(([k, v]) => (
           <div key={k as string} className="text-center">
-            <div className="font-mono text-[15px] font-semibold text-zinc-100">{v}</div>
-            <div className="text-[9px] uppercase tracking-wider text-zinc-600">{k}</div>
+            <div className="font-mono text-[15px] font-semibold text-paper">{v}</div>
+            <div className="text-[9px] uppercase tracking-wider text-paper-dim/70">{k}</div>
           </div>
         ))}
       </div>
 
       {!status.webResearchEnabled && (
-        <p className="mt-2.5 text-[10px] leading-relaxed text-amber-400/80">
+        <p className="mt-2.5 text-[10px] leading-relaxed text-amber-flag/80">
           Web research is paused — enable it above or sweeps will only use free sources.
         </p>
       )}
@@ -162,10 +162,10 @@ function WebResearchCard() {
         <div className="flex items-center gap-2.5">
           <span
             className={`flex h-2 w-2 rounded-full ${
-              on ? "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.7)]" : "bg-zinc-600"
+              on ? "bg-verdigris shadow-[0_0_6px_rgba(88,185,140,0.7)]" : "bg-zinc-600"
             }`}
           />
-          <span className={`text-[12.5px] font-medium ${on ? "text-emerald-300" : "text-zinc-400"}`}>
+          <span className={`text-[12.5px] font-medium ${on ? "text-verdigris" : "text-paper-dim"}`}>
             {on ? "Enabled" : "Paused"}
           </span>
         </div>
@@ -181,25 +181,25 @@ function WebResearchCard() {
           disabled={busy || !status?.configured}
           className={`relative h-6 w-11 shrink-0 rounded-full border transition-all duration-200 disabled:opacity-40 ${
             on
-              ? "border-emerald-500/40 bg-emerald-500/25"
-              : "border-white/10 bg-white/[0.06]"
+              ? "border-verdigris/40 bg-verdigris/25"
+              : "border-rule-strong bg-paper/[0.04]"
           }`}
           aria-label={on ? "Stop web research" : "Enable web research"}
         >
           <span
             className={`absolute top-1/2 h-4 w-4 -translate-y-1/2 rounded-full transition-all duration-200 ${
-              on ? "left-[22px] bg-emerald-300" : "left-[3px] bg-zinc-400"
+              on ? "left-[22px] bg-verdigris" : "left-[3px] bg-zinc-400"
             }`}
           />
         </button>
       </div>
       <div className="mt-2.5 flex items-center justify-between font-mono text-[10px]">
-        <span className="text-zinc-500">credits remaining</span>
-        <span className={credits != null && credits < 0 ? "text-red-300" : "text-zinc-300"}>
+        <span className="text-paper-dim">credits remaining</span>
+        <span className={credits != null && credits < 0 ? "text-oxblood" : "text-paper/90"}>
           {credits ?? "—"}
         </span>
       </div>
-      <p className="mt-2.5 border-t border-white/[0.06] pt-2.5 text-[10.5px] leading-relaxed text-zinc-600">
+      <p className="mt-2.5 border-t border-rule pt-2.5 text-[10.5px] leading-relaxed text-paper-dim/70">
         {on
           ? "Investigations search the live web via Firecrawl. Monitor cycles also query paid sources."
           : "Investigations complete from stored email & discussion evidence and note the pause. Free HN monitoring keeps running."}
@@ -228,14 +228,14 @@ function MemoryCard() {
             className={`flex h-2 w-2 rounded-full ${
               on
                 ? ok
-                  ? "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.7)]"
-                  : "bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.7)]"
+                  ? "bg-verdigris shadow-[0_0_6px_rgba(88,185,140,0.7)]"
+                  : "bg-amber-flag shadow-[0_0_6px_rgba(217,166,46,0.7)]"
                 : "bg-zinc-600"
             }`}
           />
           <span
             className={`text-[12.5px] font-medium ${
-              on ? (ok ? "text-emerald-300" : "text-amber-300") : "text-zinc-400"
+              on ? (ok ? "text-verdigris" : "text-amber-flag") : "text-paper-dim"
             }`}
           >
             {on ? (ok ? "Enabled · bridge ok" : "Enabled · bridge down") : "Off"}
@@ -252,19 +252,19 @@ function MemoryCard() {
           }}
           disabled={busy || !status?.configuredCompany || !status?.configured}
           className={`relative h-6 w-11 shrink-0 rounded-full border transition-all duration-200 disabled:opacity-40 ${
-            on ? "border-emerald-500/40 bg-emerald-500/25" : "border-white/10 bg-white/[0.06]"
+            on ? "border-verdigris/40 bg-verdigris/25" : "border-rule-strong bg-paper/[0.04]"
           }`}
           aria-label={on ? "Disable Sibyl memory" : "Enable Sibyl memory"}
         >
           <span
             className={`absolute top-1/2 h-4 w-4 -translate-y-1/2 rounded-full transition-all duration-200 ${
-              on ? "left-[22px] bg-emerald-300" : "left-[3px] bg-zinc-400"
+              on ? "left-[22px] bg-verdigris" : "left-[3px] bg-zinc-400"
             }`}
           />
         </button>
       </div>
       <div className="mt-2.5 flex items-center justify-between font-mono text-[10px]">
-        <span className="text-zinc-500">{health ? health.detail : "bridge not checked"}</span>
+        <span className="text-paper-dim">{health ? health.detail : "bridge not checked"}</span>
         <button
           onClick={async () => {
             setTesting(true);
@@ -275,12 +275,12 @@ function MemoryCard() {
             }
           }}
           disabled={testing || !status?.configured}
-          className="rounded border border-white/10 px-1.5 py-0.5 text-zinc-400 transition-colors hover:border-white/25 hover:text-zinc-200 disabled:opacity-40"
+          className="rounded border border-rule-strong px-1.5 py-0.5 text-paper-dim transition-colors hover:border-paper/30 hover:text-paper disabled:opacity-40"
         >
           {testing ? "…" : "test"}
         </button>
       </div>
-      <p className="mt-2.5 border-t border-white/[0.06] pt-2.5 text-[10.5px] leading-relaxed text-zinc-600">
+      <p className="mt-2.5 border-t border-rule pt-2.5 text-[10.5px] leading-relaxed text-paper-dim/70">
         {on
           ? "Decision-time history comes from Sibyl recall — wipe Convex and it survives. If the bridge is down, the desk decides with no history (that's the point)."
           : "Memory off: history reads come from Convex only. Turn on after seeding (Demo → Seed history) with the bridge reachable."}
@@ -312,15 +312,15 @@ function Step({
     <div className="relative flex gap-4 px-5 py-4">
       {/* rail */}
       {!last && (
-        <div className="absolute bottom-0 left-[38px] top-11 w-px bg-white/[0.07]" />
+        <div className="absolute bottom-0 left-[38px] top-11 w-px bg-paper/[0.04]" />
       )}
       <div
         className={`relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border font-mono text-[11px] font-semibold transition-all ${
           done
-            ? "border-emerald-500/40 bg-emerald-500/15 text-emerald-300"
+            ? "border-verdigris/40 bg-verdigris/15 text-verdigris"
             : loading
-              ? "animate-pulse-dot border-indigo-500/50 bg-indigo-500/15 text-indigo-300"
-              : "border-white/[0.1] bg-zinc-900 text-zinc-500"
+              ? "animate-pulse-dot border-brass/50 bg-brass/15 text-brass-bright"
+              : "border-white/[0.1] bg-ink-raised text-paper-dim"
         }`}
       >
         {done ? "✓" : n}
@@ -337,7 +337,7 @@ function Step({
             }
           }}
           disabled={!!busy}
-          className="text-left text-[13px] font-medium text-zinc-200 transition hover:text-white disabled:opacity-40"
+          className="text-left text-[13px] font-medium text-paper transition hover:text-white disabled:opacity-40"
         >
           {loading ? (
             <span className="flex items-center gap-2">
@@ -347,9 +347,9 @@ function Step({
             title
           )}
         </button>
-        <p className="mt-1 text-[11.5px] leading-relaxed text-zinc-500">{desc}</p>
+        <p className="mt-1 text-[11.5px] leading-relaxed text-paper-dim">{desc}</p>
         {result && (
-          <p className="mt-1.5 break-all rounded-lg border border-white/[0.06] bg-black/20 px-2 py-1 font-mono text-[9.5px] text-zinc-500">
+          <p className="mt-1.5 break-all rounded-lg border border-rule bg-black/20 px-2 py-1 font-mono text-[9.5px] text-paper-dim">
             {result}
           </p>
         )}
@@ -399,7 +399,7 @@ export default function DemoPanel() {
       <div className="space-y-5">
         {/* scenario switcher */}
         <Card className="p-4">
-          <SectionTitle right={<span className="text-[10px] text-zinc-500">{copy.product}</span>}>
+          <SectionTitle right={<span className="text-[10px] text-paper-dim">{copy.product}</span>}>
             Watched product
           </SectionTitle>
           <div className="flex flex-wrap gap-2">
@@ -410,8 +410,8 @@ export default function DemoPanel() {
                 disabled={!!busy}
                 className={`rounded-xl border px-3.5 py-2 text-[12.5px] font-medium transition-all disabled:opacity-40 ${
                   scenario === key
-                    ? "border-indigo-400/50 bg-indigo-500/15 text-indigo-200 shadow-[0_0_16px_rgba(99,102,241,0.15)]"
-                    : "border-white/[0.08] bg-white/[0.02] text-zinc-400 hover:border-white/20 hover:text-zinc-200"
+                    ? "border-brass/50 bg-brass/15 text-brass-bright shadow-[0_0_16px_rgba(201,162,75,0.15)]"
+                    : "border-rule bg-paper/[0.015] text-paper-dim hover:border-paper/25 hover:text-paper"
                 }`}
               >
                 {busy === `switch:${key}` ? "switching…" : sc.label}
@@ -419,25 +419,25 @@ export default function DemoPanel() {
               </button>
             ))}
           </div>
-          <p className="mt-2.5 text-[10.5px] leading-relaxed text-zinc-600">
+          <p className="mt-2.5 text-[10.5px] leading-relaxed text-paper-dim/70">
             Switching rewrites the company identity, monitored sources and story data —
             inboxes stay the same. Steps below then run the scenario.
           </p>
         </Card>
 
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <p className="text-[13px] text-zinc-400">
+        <p className="text-[13px] text-paper-dim">
           The engine walkthrough — every button runs the real pipeline.
         </p>
-        <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-zinc-500">
+        <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-paper-dim">
           <LiveDot /> live
         </span>
       </div>
 
       {/* Provo board demo */}
       <Card>
-        <div className="border-b border-white/[0.06] px-5 py-3.5">
-          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
+        <div className="border-b border-rule px-5 py-3.5">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-paper-dim">
             Provo · the project board
           </span>
         </div>
@@ -462,8 +462,8 @@ export default function DemoPanel() {
 
       <div className="grid gap-5 lg:grid-cols-3">
         <Card className="lg:col-span-2">
-          <div className="border-b border-white/[0.06] px-5 py-3.5">
-            <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500">
+          <div className="border-b border-rule px-5 py-3.5">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-paper-dim">
               3-minute walkthrough
             </span>
           </div>
@@ -553,9 +553,9 @@ export default function DemoPanel() {
                 ["Reports sent", String(reports?.length ?? 0), "sans"],
               ].map(([k, v, style]) => (
                 <div key={k as string} className="flex items-center justify-between gap-3">
-                  <dt className="shrink-0 text-zinc-500">{k}</dt>
+                  <dt className="shrink-0 text-paper-dim">{k}</dt>
                   <dd
-                    className={`truncate text-right text-zinc-300 ${style === "mono" ? "font-mono text-[10.5px]" : ""}`}
+                    className={`truncate text-right text-paper/90 ${style === "mono" ? "font-mono text-[10.5px]" : ""}`}
                   >
                     {v}
                   </dd>
@@ -569,10 +569,10 @@ export default function DemoPanel() {
             <ul className="space-y-2">
               {company?.sources?.map((s: any) => (
                 <li key={s._id} className="flex items-center justify-between text-[11.5px]">
-                  <span className="text-zinc-300">{s.name}</span>
+                  <span className="text-paper/90">{s.name}</span>
                   <span
                     className={`flex items-center gap-1.5 font-mono text-[9.5px] ${
-                      s.lastCheckedAt ? "text-emerald-400" : "text-zinc-600"
+                      s.lastCheckedAt ? "text-verdigris" : "text-paper-dim/70"
                     }`}
                   >
                     {s.lastCheckedAt && <span className="h-1 w-1 rounded-full bg-current" />}
@@ -581,10 +581,10 @@ export default function DemoPanel() {
                 </li>
               ))}
               {(!company?.sources || company.sources.length === 0) && (
-                <li className="text-[11.5px] text-zinc-500">Run setup first.</li>
+                <li className="text-[11.5px] text-paper-dim">Run setup first.</li>
               )}
             </ul>
-            <p className="mt-3 border-t border-white/[0.06] pt-3 text-[10.5px] leading-relaxed text-zinc-600">
+            <p className="mt-3 border-t border-rule pt-3 text-[10.5px] leading-relaxed text-paper-dim/70">
               Inbound mail never sleeps: webhook + a 2-minute poll cron feed the same handler. Web
               monitoring is on-demand (budget-friendly); HN uses a free direct feed. Firecrawl web
               research is toggleable via <span className="font-mono">FIRECRAWL_ENABLED</span>.

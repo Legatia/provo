@@ -44,10 +44,10 @@ export default function Chat() {
               <div className="flex h-12 w-12 items-center justify-center rounded-md border border-brass/50 font-display text-[24px] font-semibold italic text-brass-bright">
                 P
               </div>
-              <p className="mt-4 text-sm font-medium text-zinc-300">
+              <p className="mt-4 text-sm font-medium text-paper/90">
                 Ask the desk
               </p>
-              <p className="mt-1 max-w-sm text-xs leading-relaxed text-zinc-500">
+              <p className="mt-1 max-w-sm text-xs leading-relaxed text-paper-dim">
                 It answers from live Convex state — issues, signals, evidence and investigations —
                 and can trigger real investigations or email findings.
               </p>
@@ -64,16 +64,16 @@ export default function Chat() {
                 </span>
               )}
               <div
-                className={`max-w-[78%] whitespace-pre-line rounded-2xl px-4 py-2.5 text-[13px] leading-relaxed ${
+                className={`max-w-[78%] whitespace-pre-line rounded-xl px-4 py-2.5 text-[13px] leading-relaxed ${
                   m.role === "user"
-                    ? "rounded-br-md bg-indigo-500/90 text-white shadow-[0_0_20px_rgba(99,102,241,0.2)]"
-                    : "rounded-bl-md border border-white/[0.07] bg-white/[0.04] text-zinc-200"
+                    ? "rounded-br-md bg-brass/90 text-white shadow-[0_0_20px_rgba(201,162,75,0.2)]"
+                    : "rounded-bl-md border border-rule bg-paper/[0.025] text-paper"
                 }`}
               >
                 {m.content}
               </div>
               {m.role === "user" && (
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/[0.08] text-[11px]">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-paper/[0.045] text-[11px]">
                   🧑
                 </span>
               )}
@@ -84,11 +84,11 @@ export default function Chat() {
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-sm border border-brass/40 font-display text-[14px] italic text-brass-bright">
                 P
               </span>
-              <div className="flex items-center gap-1.5 rounded-2xl rounded-bl-md border border-white/[0.07] bg-white/[0.04] px-4 py-3">
+              <div className="flex items-center gap-1.5 rounded-xl rounded-bl-md border border-rule bg-paper/[0.025] px-4 py-3">
                 {[0, 1, 2].map((i) => (
                   <span
                     key={i}
-                    className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-indigo-300"
+                    className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-brass-bright"
                     style={{ animationDelay: `${i * 0.2}s` }}
                   />
                 ))}
@@ -99,14 +99,14 @@ export default function Chat() {
         </div>
 
         {/* composer */}
-        <div className="border-t border-white/[0.06] bg-black/20 p-4">
+        <div className="border-t border-rule bg-black/20 p-4">
           <div className="mb-2.5 flex flex-wrap gap-1.5">
             {SUGGESTIONS.map((s) => (
               <button
                 key={s}
                 onClick={() => submit(s)}
                 disabled={busy}
-                className="rounded-full border border-white/[0.08] bg-white/[0.02] px-3 py-1 text-[11px] text-zinc-400 transition-all hover:border-indigo-400/40 hover:bg-indigo-500/10 hover:text-indigo-200 disabled:opacity-40"
+                className="rounded-full border border-rule bg-paper/[0.015] px-3 py-1 text-[11px] text-paper-dim transition-all hover:border-brass/40 hover:bg-brass/10 hover:text-brass-bright disabled:opacity-40"
               >
                 {s}
               </button>
@@ -123,7 +123,7 @@ export default function Chat() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask about findings, signals, trends…"
-              className="flex-1 rounded-xl border border-white/[0.09] bg-black/30 px-4 py-2.5 text-[13px] text-zinc-100 placeholder-zinc-600 outline-none transition focus:border-indigo-400/50 focus:bg-black/50"
+              className="flex-1 rounded-xl border border-rule bg-black/30 px-4 py-2.5 text-[13px] text-paper placeholder-zinc-600 outline-none transition focus:border-brass/50 focus:bg-black/50"
             />
             <Button type="submit" variant="primary" disabled={busy || !input.trim()}>
               Send

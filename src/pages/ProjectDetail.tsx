@@ -23,10 +23,10 @@ export default function ProjectDetail() {
   const [tab, setTab] = useState<Tab>("dossier");
 
   if (project === undefined || monitoredNames === undefined) {
-    return <div className="py-16 text-center text-[12px] text-zinc-500">loading…</div>;
+    return <div className="py-16 text-center text-[12px] text-paper-dim">loading…</div>;
   }
   if (project === null) {
-    return <div className="py-16 text-center text-[12px] text-zinc-500">No such project on the board.</div>;
+    return <div className="py-16 text-center text-[12px] text-paper-dim">No such project on the board.</div>;
   }
 
   // the engine watches every monitored entity; Engine + Findings are exposed
@@ -49,7 +49,7 @@ export default function ProjectDetail() {
               <span className="stamp ml-2 border-rule-strong bg-paper/[0.03] text-paper-dim">simulation</span>
             )}
           </h2>
-          <p className="mt-0.5 text-[12px] text-zinc-500">{project.tagline}</p>
+          <p className="mt-0.5 text-[12px] text-paper-dim">{project.tagline}</p>
         </div>
         <div className="flex items-center gap-2">
           {project.links?.site && (
@@ -57,12 +57,12 @@ export default function ProjectDetail() {
               href={project.links.site}
               target="_blank"
               rel="noreferrer"
-              className="rounded-lg border border-white/[0.08] px-2.5 py-1 font-mono text-[10px] text-zinc-400 hover:border-white/20 hover:text-zinc-200"
+              className="rounded-lg border border-white/[0.08] px-2.5 py-1 font-mono text-[10px] text-paper-dim hover:border-white/20 hover:text-zinc-200"
             >
               {project.links.site.replace(/^https?:\/\//, "")}
             </a>
           )}
-          <span className="rounded border border-white/[0.07] px-1.5 py-px font-mono text-[9px] uppercase text-zinc-500">
+          <span className="rounded border border-rule px-1.5 py-px font-mono text-[9px] uppercase text-paper-dim">
             {project.chain}
           </span>
         </div>
@@ -93,14 +93,14 @@ export default function ProjectDetail() {
             <span className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-verdigris">
               Provo Monitor · active
             </span>
-            <span className="text-[11px] text-zinc-500">
+            <span className="text-[11px] text-paper-dim">
               Engine + Findings are this customer's monitoring view
             </span>
           </div>
           <div className="flex items-center gap-3">
             {credits && (
               <div className="flex items-center gap-2">
-                <span className="font-mono text-[10px] text-zinc-500">credits</span>
+                <span className="font-mono text-[10px] text-paper-dim">credits</span>
                 <span
                   className={`font-mono text-[12px] font-semibold ${
                     credits.balance > 0 ? "text-emerald-300" : "text-red-300"
@@ -109,7 +109,7 @@ export default function ProjectDetail() {
                   {credits.balance.toFixed(1)}
                 </span>
                 {credits.history[0] && credits.history[0].kind === "burn" && (
-                  <span className="font-mono text-[10px] text-zinc-600">
+                  <span className="font-mono text-[10px] text-paper-dim/70">
                     last: {credits.history[0].amount} · {credits.history[0].action}
                   </span>
                 )}
@@ -139,11 +139,11 @@ export default function ProjectDetail() {
             Verdict {project.verdict ? `— ${project.verdict.toUpperCase()}` : ""}
           </SectionTitle>
           {project.verdictSummary ? (
-            <p className="mt-2 text-[12.5px] leading-relaxed text-zinc-300">{project.verdictSummary}</p>
+            <p className="mt-2 text-[12.5px] leading-relaxed text-paper/90">{project.verdictSummary}</p>
           ) : project.status === "under_review" ? (
             <p className="mt-2 text-[12px] text-indigo-300">The desk is reviewing this application…</p>
           ) : (
-            <p className="mt-2 text-[12px] text-zinc-500">No verdict yet — the desk hasn't reviewed this application.</p>
+            <p className="mt-2 text-[12px] text-paper-dim">No verdict yet — the desk hasn't reviewed this application.</p>
           )}
 
           {project.riskTags && project.riskTags.length > 0 && (
@@ -158,7 +158,7 @@ export default function ProjectDetail() {
 
           {project.recalledMemories && project.recalledMemories.length > 0 && (
             <div className="mt-4">
-              <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-zinc-600">
+              <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-paper-dim/70">
                 Sibyl memories the verdict relied on
               </div>
               <div className="mt-2 flex flex-wrap gap-1.5">
@@ -173,14 +173,14 @@ export default function ProjectDetail() {
 
           {project.evidence && project.evidence.length > 0 && (
             <div className="mt-4 space-y-2">
-              <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-zinc-600">
+              <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-paper-dim/70">
                 Public-opinion evidence
               </div>
               {project.evidence.map((e, i) => (
-                <div key={i} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
-                  <p className="text-[11.5px] leading-relaxed text-zinc-400">“{e.excerpt}”</p>
+                <div key={i} className="rounded-xl border border-white/[0.06] bg-paper/[0.015] p-3">
+                  <p className="text-[11.5px] leading-relaxed text-paper-dim">“{e.excerpt}”</p>
                   {e.url && (
-                    <a href={e.url} target="_blank" rel="noreferrer" className="mt-1 inline-block font-mono text-[10px] text-zinc-600 hover:text-zinc-400">
+                    <a href={e.url} target="_blank" rel="noreferrer" className="mt-1 inline-block font-mono text-[10px] text-paper-dim/70 hover:text-paper-dim">
                       {e.url.slice(0, 70)}
                     </a>
                   )}
@@ -189,7 +189,7 @@ export default function ProjectDetail() {
             </div>
           )}
 
-          <div className="mt-4 border-t border-white/[0.05] pt-2.5 text-[10px] text-zinc-600">
+          <div className="mt-4 border-t border-white/[0.05] pt-2.5 text-[10px] text-paper-dim/70">
             applied {timeAgo(project.appliedAt)} ago
             {project.decidedAt ? ` · decided ${timeAgo(project.decidedAt)} ago` : ""}
           </div>
@@ -200,7 +200,7 @@ export default function ProjectDetail() {
       {tab === "findings" && monitored && <Issues />}
 
       {!monitored && tab !== "dossier" && (
-        <Card className="p-8 text-center text-[12px] text-zinc-500">
+        <Card className="p-8 text-center text-[12px] text-paper-dim">
           Deep monitoring isn't enabled for this project yet — the engine currently watches one project at a time.
         </Card>
       )}

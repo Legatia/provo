@@ -29,7 +29,7 @@ function SimBadge() {
 }
 
 function SentimentBar({ score }: { score?: number }) {
-  if (score == null) return <span className="font-mono text-[10px] text-zinc-600">no sentiment yet</span>;
+  if (score == null) return <span className="font-mono text-[10px] text-paper-dim/70">no sentiment yet</span>;
   const color = score >= 60 ? "bg-verdigris" : score >= 40 ? "bg-amber-flag" : "bg-oxblood";
   const textColor = score >= 60 ? "text-verdigris" : score >= 40 ? "text-amber-flag" : "text-oxblood";
   return (
@@ -59,12 +59,12 @@ export default function Board() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold tracking-tight text-zinc-100">Project board</h2>
-          <p className="mt-0.5 text-[12px] text-zinc-500">
+          <p className="mt-0.5 text-[12px] text-paper-dim">
             Every project has a past — Provo keeps the record. Choose a project to open its
             dossier; the monitored project also exposes its engine and findings.
           </p>
         </div>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.07] bg-white/[0.03] px-2.5 py-1 text-[10px] uppercase tracking-wider text-zinc-500">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-rule bg-paper/[0.02] px-2.5 py-1 text-[10px] uppercase tracking-wider text-paper-dim">
           <LiveDot /> desk live
         </span>
       </div>
@@ -86,13 +86,13 @@ export default function Board() {
           </div>
           <div className="mt-3 flex flex-wrap items-baseline gap-x-3">
             <h3 className="font-display text-[18px] font-semibold text-paper">{p.name}</h3>
-            <span className="rounded border border-white/[0.07] px-1.5 py-px font-mono text-[9px] uppercase text-zinc-500">
+            <span className="rounded border border-rule px-1.5 py-px font-mono text-[9px] uppercase text-paper-dim">
               {p.chain}
             </span>
-            <span className="text-[12.5px] text-zinc-400">{p.tagline}</span>
+            <span className="text-[12.5px] text-paper-dim">{p.tagline}</span>
           </div>
           {p.verdictSummary && (
-            <p className="mt-2 max-w-3xl text-[11.5px] leading-relaxed text-zinc-500">{p.verdictSummary}</p>
+            <p className="mt-2 max-w-3xl text-[11.5px] leading-relaxed text-paper-dim">{p.verdictSummary}</p>
           )}
         </div>
       ))}
@@ -102,7 +102,7 @@ export default function Board() {
         {rest.map((p) => (
           <Card
             key={p._id}
-            className="cursor-pointer p-4 transition-all hover:border-white/[0.14]"
+            className="cursor-pointer p-4 transition-all hover:border-brass/40"
           >
             <div onClick={() => open(p.slug)}>
               <div className="flex items-center justify-between gap-2">
@@ -110,12 +110,12 @@ export default function Board() {
                   <StatusBadge status={p.status} />
                   {p.simulated && <SimBadge />}
                 </div>
-                <span className="rounded border border-white/[0.07] px-1.5 py-px font-mono text-[9px] uppercase text-zinc-500">
+                <span className="rounded border border-rule px-1.5 py-px font-mono text-[9px] uppercase text-paper-dim">
                   {p.chain}
                 </span>
               </div>
               <h3 className="mt-2.5 font-display text-[16px] font-semibold text-paper">{p.name}</h3>
-              <p className="mt-1 line-clamp-2 min-h-[2.2em] text-[11.5px] leading-relaxed text-zinc-500">
+              <p className="mt-1 line-clamp-2 min-h-[2.2em] text-[11.5px] leading-relaxed text-paper-dim">
                 {p.tagline}
               </p>
               <div className="mt-3 flex items-center justify-between border-t border-white/[0.05] pt-2.5">
@@ -149,7 +149,7 @@ export default function Board() {
           </Card>
         ))}
         {projects && projects.length === 0 && (
-          <Card className="col-span-full p-8 text-center text-[12px] text-zinc-500">
+          <Card className="col-span-full p-8 text-center text-[12px] text-paper-dim">
             No applicants yet — seed the demo board from the Demo panel.
           </Card>
         )}

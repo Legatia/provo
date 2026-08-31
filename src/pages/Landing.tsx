@@ -24,18 +24,7 @@ export default function Landing() {
 
   return (
     <div className="min-h-full bg-ink text-paper">
-      {/* masthead bar */}
-      <div className="border-b border-rule">
-        <Section className="flex h-9 items-center justify-between font-mono text-[9.5px] uppercase tracking-[0.22em] text-paper-dim">
-          <span>Onchain intelligence bureau</span>
-          <span className="hidden sm:inline">Est. 2026 · Base</span>
-          <span className="flex items-center gap-1.5 text-verdigris">
-            <span className="h-1 w-1 rounded-full bg-verdigris" /> desk on duty
-          </span>
-        </Section>
-      </div>
-
-      {/* nav */}
+      {/* single masthead bar — bureau identity + nav in one */}
       <nav className="sticky top-0 z-20 border-b border-rule bg-ink/85 backdrop-blur-xl">
         <Section className="flex h-14 items-center justify-between">
           <div className="flex items-center gap-3">
@@ -43,13 +32,19 @@ export default function Landing() {
               P
             </span>
             <span className="font-display text-[19px] font-semibold tracking-tight">Provo</span>
+            <span className="ml-2 hidden font-mono text-[9px] uppercase tracking-[0.22em] text-paper-dim md:inline">
+              onchain intelligence bureau · Base
+            </span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <span className="hidden items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.18em] text-verdigris sm:flex">
+              <span className="h-1 w-1 rounded-full bg-verdigris" /> desk on duty
+            </span>
             <a
               href="https://github.com/Legatia/provo"
               target="_blank"
               rel="noreferrer"
-              className="rounded-md px-3 py-1.5 font-mono text-[11px] text-paper-dim transition hover:text-paper"
+              className="rounded-md px-2 py-1.5 font-mono text-[11px] text-paper-dim transition hover:text-paper"
             >
               GitHub
             </a>
@@ -73,6 +68,7 @@ export default function Landing() {
               {decided} verdicts{decided > 0 ? ` · ${listed} listed · ${flagged} flagged` : ""}
             </span>
           </div>
+          <div className="ledger-rule mt-3" />
         </div>
 
         <h1
@@ -135,8 +131,13 @@ export default function Landing() {
       {/* three doors */}
       <Section className="pb-16">
         <div className="ledger-rule" />
-        <h2 className="mt-4 text-center font-mono text-[10px] uppercase tracking-[0.24em] text-paper-dim">
-          One intelligence engine · three doors
+        <h2 className="mt-5 flex items-baseline justify-center gap-3 text-center">
+          <span className="font-display text-[22px] font-semibold tracking-tight text-paper">
+            One intelligence engine
+          </span>
+          <span className="font-mono text-[9.5px] uppercase tracking-[0.24em] text-brass">
+            № I–III · three doors
+          </span>
         </h2>
         <div className="mt-8 grid gap-px border border-rule bg-rule md:grid-cols-3">
           {[
@@ -179,8 +180,11 @@ export default function Landing() {
       {/* how it works — ledger row */}
       <Section className="pb-16">
         <div className="ledger-rule" />
-        <h2 className="mt-4 text-center font-mono text-[10px] uppercase tracking-[0.24em] text-paper-dim">
-          How a listing gets decided
+        <h2 className="mt-5 flex items-baseline justify-center gap-3 text-center">
+          <span className="font-display text-[22px] font-semibold tracking-tight text-paper">
+            How a listing gets decided
+          </span>
+          <span className="font-mono text-[9.5px] uppercase tracking-[0.24em] text-brass">№ 01–05</span>
         </h2>
         <div className="mt-8 grid gap-px border border-rule bg-rule md:grid-cols-5">
           {[
@@ -225,8 +229,14 @@ export default function Landing() {
               <div className="mt-3 font-display text-[17px] font-semibold">
                 {flaggedExample.name}
               </div>
-              <p className="mt-1.5 text-[11.5px] leading-relaxed text-paper-dim">
+              <p className="mt-1.5 line-clamp-3 text-[11.5px] leading-relaxed text-paper-dim">
                 {flaggedExample.verdictSummary}
+                <Link
+                  to={`/project/${flaggedExample.slug}`}
+                  className="ml-1 font-mono text-[10px] text-amber-flag/80 hover:text-amber-flag"
+                >
+                  …the record continues →
+                </Link>
               </p>
               <Link
                 to={`/project/${flaggedExample.slug}`}

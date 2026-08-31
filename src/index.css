@@ -106,7 +106,7 @@ body {
   white-space: nowrap;
   text-transform: uppercase;
   border-radius: 2px;
-  transform: rotate(-1.2deg);
+  transform: rotate(-0.8deg);
 }
 
 /* ── ledger rule: double hairline under mastheads ────────────────────────── */
@@ -162,14 +162,14 @@ body {
 @keyframes stamp-in {
   0% {
     opacity: 0;
-    transform: rotate(-1.2deg) scale(1.6);
+    transform: rotate(-0.8deg) scale(1.6);
   }
   60% {
     opacity: 1;
-    transform: rotate(-1.2deg) scale(0.96);
+    transform: rotate(-0.8deg) scale(0.96);
   }
   100% {
-    transform: rotate(-1.2deg) scale(1);
+    transform: rotate(-0.8deg) scale(1);
   }
 }
 .stamp-in {

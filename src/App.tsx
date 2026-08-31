@@ -45,16 +45,16 @@ function Header() {
         : ["Provo", ""]);
 
   return (
-    <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-white/[0.06] bg-zinc-950/70 px-8 backdrop-blur-xl">
+    <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-rule bg-ink/70 px-8 backdrop-blur-xl">
       <div className="flex items-baseline gap-3">
-        <h1 className="text-[15px] font-semibold tracking-tight text-zinc-100">{title}</h1>
-        <span className="hidden text-xs text-zinc-500 md:inline">{subtitle}</span>
+        <h1 className="font-mono text-[11px] font-semibold uppercase tracking-[0.22em] text-paper">{title}</h1>
+        <span className="hidden text-xs text-paper-dim md:inline">{subtitle}</span>
       </div>
       <div className="flex items-center gap-3">
-        <span className="hidden items-center gap-1.5 rounded-full border border-white/[0.07] bg-white/[0.03] px-2.5 py-1 text-[10px] uppercase tracking-wider text-zinc-500 sm:inline-flex">
+        <span className="hidden items-center gap-1.5 rounded-full border border-rule bg-paper/[0.02] px-2.5 py-1 text-[10px] uppercase tracking-wider text-paper-dim sm:inline-flex">
           convex · sibyl · firecrawl · base
         </span>
-        <span className="font-mono text-xs tabular-nums text-zinc-500">
+        <span className="font-mono text-xs tabular-nums text-paper-dim">
           {clock.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", second: "2-digit" })}
         </span>
       </div>
@@ -69,37 +69,37 @@ function Sidebar() {
   const lastActivity = activity?.[0];
 
   return (
-    <aside className="flex w-60 shrink-0 flex-col border-r border-white/[0.06]">
+    <aside className="flex w-60 shrink-0 flex-col border-r border-rule">
       {/* brand */}
       <div className="flex items-center gap-3 px-5 pb-6 pt-6">
-        <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500/80 to-violet-600/80 text-base shadow-[0_0_24px_rgba(99,102,241,0.35)]">
-          🏛️
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-brass/50 bg-ink font-display text-[19px] font-semibold italic leading-none text-brass-bright">
+          P
         </div>
         <div>
           <div className="font-display text-[17px] font-semibold leading-tight tracking-tight">
             Provo
           </div>
-          <div className="mt-0.5 flex items-center gap-1.5 text-[10px] font-medium text-emerald-400">
+          <div className="mt-0.5 flex items-center gap-1.5 text-[10px] font-medium text-verdigris">
             <LiveDot /> on duty
           </div>
         </div>
       </div>
 
       {/* nav */}
-      <nav className="space-y-0.5 px-3">
+      <nav className="space-y-0.5">
         {NAV.map((n) => (
           <NavLink
             key={n.to}
             to={n.to}
             className={({ isActive }) =>
-              `group flex items-center gap-3 rounded-xl px-3 py-2 text-[13px] transition-all ${
+              `group flex items-center gap-3 border-l-2 py-2 pl-3.5 pr-2 font-mono text-[11.5px] uppercase tracking-[0.08em] transition-all ${
                 isActive
-                  ? "bg-white/[0.07] font-medium text-zinc-100 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]"
-                  : "text-zinc-500 hover:bg-white/[0.03] hover:text-zinc-300"
+                  ? "border-brass bg-brass/[0.07] font-semibold text-brass-bright"
+                  : "border-transparent text-paper-dim hover:border-rule-strong hover:bg-paper/[0.02] hover:text-paper"
               }`
             }
           >
-            <span className="w-4 text-center text-xs opacity-60">{n.icon}</span>
+            <span className="w-4 text-center text-[10px] opacity-70">{n.icon}</span>
             <span className="flex-1">{n.label}</span>
           </NavLink>
         ))}
@@ -107,33 +107,33 @@ function Sidebar() {
 
       {/* agent card */}
       <div className="mt-auto space-y-3 p-4">
-        <div className="rounded-2xl border border-white/[0.07] bg-white/[0.025] p-3.5">
-          <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-zinc-600">
+        <div className="rounded-xl border border-rule bg-paper/[0.015] p-3.5">
+          <div className="text-[9px] font-semibold uppercase tracking-[0.18em] text-paper-dim/70">
             Agent
           </div>
           <div className="mt-2 flex items-center gap-2">
-            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500/70 to-violet-600/70 text-[10px]">
-              🏛️
+            <span className="flex h-6 w-6 items-center justify-center rounded-sm border border-rule-strong font-display text-[13px] italic leading-none text-brass">
+              P
             </span>
             <div className="min-w-0">
-              <div className="truncate text-xs font-medium text-zinc-200">
+              <div className="truncate text-xs font-medium text-paper">
                 {company?.name ?? "—"}
               </div>
-              <div className="truncate font-mono text-[10px] text-zinc-500">
+              <div className="truncate font-mono text-[10px] text-paper-dim">
                 {company?.agentInbox ?? "not provisioned"}
               </div>
             </div>
           </div>
-          <div className="mt-3 border-t border-white/[0.06] pt-2.5">
-            <div className="flex items-center justify-between text-[10px] text-zinc-500">
+          <div className="mt-3 border-t border-rule pt-2.5">
+            <div className="flex items-center justify-between text-[10px] text-paper-dim">
               <span>last action</span>
-              <span className="font-mono text-zinc-400">
+              <span className="font-mono text-paper-dim">
                 {lastActivity ? timeAgo(lastActivity.startedAt) + " ago" : "—"}
               </span>
             </div>
           </div>
         </div>
-        <p className="px-1 text-[9px] leading-relaxed tracking-wide text-zinc-600">
+        <p className="px-1 text-[9px] leading-relaxed tracking-wide text-paper-dim/70">
           watches · vets · remembers · sells its intel
         </p>
       </div>
