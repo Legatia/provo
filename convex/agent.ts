@@ -64,7 +64,8 @@ async function fetchSearchItems(
   sourceName: string,
   limit = 8
 ): Promise<FetchedItem[]> {
-  const hits = await firecrawl.search(query, limit);
+  // lite: candidate detection only needs titles/descriptions (1 credit, not 1+N)
+  const hits = await firecrawl.searchLite(query, limit);
   return hits.map((h) => ({
     externalId: `web:${h.url}`,
     title: h.title,

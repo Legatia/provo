@@ -21,6 +21,38 @@ export function enabled(): boolean {
   return process.env.FIRECRAWL_ENABLED !== "false";
 }
 
+// ── quota guard ──────────────────────────────────────────────────────────────
+// Billing: search = 1 credit + 1 per scraped page (scrapeOptions). The guard
+// polls credit usage at most once per 10 min and hard-stops paid calls below
+// the reserve so the desk degrades to free/free sources instead of overage.
+let quotaCache: { remaining: number; checkedAt: number } | null = null;
+const QUOTA_RESERVE = 20;
+
+export async function remainingCredits(): Promise<number | null> {
+  if (quotaCache && Date.now() - quotaCache.checkedAt < 600_000) return quotaCache.remaining;
+  try {
+    const res = await fetch(`${BASE.replace("/v2", "")}/v2/team/credit-usage`, {
+      headers: { Authorization: `Bearer ${key()}` },
+      signal: AbortSignal.timeout(10_000),
+    });
+    const json = (await res.json()) as { success?: boolean; data?: { remainingCredits?: number } };
+    const remaining = json.data?.remainingCredits;
+    if (typeof remaining === "number") {
+      quotaCache = { remaining, checkedAt: Date.now() };
+      return remaining;
+    }
+  } catch {
+    // usage probe failing must not break searches
+  }
+  return quotaCache?.remaining ?? null;
+}
+
+async function quotaAllows(): Promise<boolean> {
+  const remaining = await remainingCredits();
+  if (remaining !== null && remaining <= QUOTA_RESERVE) return false;
+  return true;
+}
+
 export type SearchHit = {
   title: string;
   url: string;
@@ -55,7 +87,13 @@ async function call<T>(path: string, body: unknown, timeoutMs = 45_000): Promise
   }
 }
 
+/** Full search WITH per-result scraping: 1 + limit credits. Reserve for
+ *  evidence extraction only (verbatim excerpts need page markdown). */
 export async function search(query: string, limit = 6): Promise<SearchHit[]> {
+  if (!(await quotaAllows())) {
+    console.warn(`Firecrawl skipped (quota ≤ ${QUOTA_RESERVE}): ${query.slice(0, 60)}`);
+    return [];
+  }
   const data = await call<{ web?: SearchHit[] }>(
     "/search",
     { query, limit, scrapeOptions: { formats: ["markdown"], onlyMainContent: true } },
@@ -66,6 +104,26 @@ export async function search(query: string, limit = 6): Promise<SearchHit[]> {
     url: h.url,
     description: h.description ?? "",
     markdown: h.markdown ? h.markdown.slice(0, 4000) : undefined,
+  }));
+}
+
+/** Lite search: titles + descriptions only — 1 credit flat. Use for
+ *  candidate detection (monitor sweeps, research bursts) where the keyword
+ *  pre-filter doesn't need page bodies. */
+export async function searchLite(query: string, limit = 8): Promise<SearchHit[]> {
+  if (!(await quotaAllows())) {
+    console.warn(`Firecrawl lite skipped (quota ≤ ${QUOTA_RESERVE}): ${query.slice(0, 60)}`);
+    return [];
+  }
+  const data = await call<{ web?: SearchHit[] }>(
+    "/search",
+    { query, limit },
+    45_000
+  );
+  return (data?.web ?? []).map((h) => ({
+    title: h.title ?? "(untitled)",
+    url: h.url,
+    description: h.description ?? "",
   }));
 }
 

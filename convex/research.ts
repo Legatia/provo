@@ -130,7 +130,7 @@ export const sweep = internalAction({
     const queryStr = `${company.product} ${angle}`;
     let hits: any[] = [];
     if (webOn) {
-      hits = await firecrawl.searchWithBackoff(queryStr, 4);
+      hits = await firecrawl.searchLite(queryStr, 4);
     }
 
     await ctx.runMutation(internal.state.logTask, {

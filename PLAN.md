@@ -244,7 +244,8 @@ Convex agent (TS, cloud) --HTTPS--> sibyl-bridge (FastAPI, sibyl-bridge/) --> si
 | Directory looks thin | Pitch opt-in listings, never "all of Base"; ~10 seeded applicants |
 | Featurer/verdict conflict question | The integrity beat *is* the answer: paid placement, visible sentiment, receipts on screen |
 | Sourcing gap (no X/Telegram) | Farcaster native + Reddit/HN; scope the pitch to covered sources |
-| x402 wallet friction | Facilitator path now conforms to official /verify+isValid (untested against live facilitator — fund wallet and test Sep 3); dev-settlement (X402_DEV_SETTLE=1) currently ON for demos — anyone with a "dev-" header can mint; acceptable for the window, remove for production |
+| x402 wallet friction | Facilitator path conforms to official /verify+isValid (test with funded wallet Sep 3); dev settlement requires the exact `dev-<DEMO_KEY>` header — remove for production |
+| **Firecrawl quota EXHAUSTED (Aug 31)** | 1,000/mo plan at −1; resets Sep 30 (after judging). Cause: every search scraped all results (1+N credits) — fixed: monitor sweeps/bursts now use 1-credit lite search, evidence extraction keeps scraping; web-research toggle is OFF (degraded mode: HN free source + stored evidence; investigations/reviews run without new searches). Options for demo: Firecrawl Hobby (~\$16/mo, 3,000 credits) or demo in degraded mode — old evidence excerpts remain on dossiers either way |
 | Featuring integrity question | Answered by design and by the live board: slot sold, verdict + sentiment stay beside it |
 | Judge-poking the payment rail (Aug 31 audit) | dev settlement now requires the exact `dev-<DEMO_KEY>` header; demo top-up moved behind key-gated `/api/credits/demo`; `credits.grant` removed from the public API; facilitator path refuses the burn-address placeholder until a real wallet is set |
 | Cross-entity data bleed (Aug 31 audit) | fixed: Engine/Findings queries are entity-scoped — Lumen's tabs show Lumen's data |
